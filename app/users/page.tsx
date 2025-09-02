@@ -252,48 +252,100 @@ export default function UsersPage() {
         <AppHeader title={'จัดการผู้ใช้'} />
 
         <div className="flex flex-1 flex-col gap-6 p-4">
+
           {/* User Statistics */}
+          {/* <div className="grid gap-4 md:grid-cols-4">
+            <Card className="bg-white">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 ">
+                <CardTitle className="text-xl font-semibold">ผู้ใช้ทั้งหมด</CardTitle>
+                <Users className="h-7 w-7 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-[40px] font-bold">{users.length}</div>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-white">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0">
+                <CardTitle className="text-xl font-semibold">ผู้ใช้ที่ใช้งาน</CardTitle>
+                <CheckCircle className="h-7 w-7 text-green-500" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-[40px] font-bold">{users.filter((u) => u.status === "active").length}</div>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-white">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0">
+                <CardTitle className="text-xl font-semibold">ผู้ดูแลระบบ</CardTitle>
+                <ShieldCheck className="h-7 w-7 text-red-500" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-[40px] font-bold">{users.filter((u) => u.role === "admin").length}</div>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-white">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0">
+                <CardTitle className="text-xl font-semibold">นักวิเคราะห์</CardTitle>
+                <Shield className="h-7 w-7 text-blue-500" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-[40px] font-bold">{users.filter((u) => u.role === "analyst").length}</div>
+              </CardContent>
+            </Card>
+          </div> */}
+
           <div className="grid gap-4 md:grid-cols-4">
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">ผู้ใช้ทั้งหมด</CardTitle>
-                <Users className="h-4 w-4 text-muted-foreground" />
+            {/** Users Card */}
+            <Card className="bg-white rounded-2xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow duration-200">
+              <CardHeader className="flex items-center justify-between">
+                <CardTitle className="text-xl font-semibold text-gray-800">ผู้ใช้ทั้งหมด</CardTitle>
+                <Users className="h-7 w-7 text-blue-500" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{users.length}</div>
+                <div className="text-4xl font-bold text-gray-900">{users.length}</div>
               </CardContent>
             </Card>
 
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">ผู้ใช้ที่ใช้งาน</CardTitle>
-                <CheckCircle className="h-4 w-4 text-green-500" />
+            {/** Active Users Card */}
+            <Card className="bg-white rounded-2xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow duration-200">
+              <CardHeader className="flex items-center justify-between">
+                <CardTitle className="text-xl font-semibold text-gray-800">ผู้ใช้ที่ใช้งาน</CardTitle>
+                <CheckCircle className="h-7 w-7 text-green-500" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{users.filter((u) => u.status === "active").length}</div>
+                <div className="text-4xl font-bold text-gray-900">{users.filter((u) => u.status === "active").length}</div>
               </CardContent>
             </Card>
 
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">ผู้ดูแลระบบ</CardTitle>
-                <ShieldCheck className="h-4 w-4 text-red-500" />
+            {/** Admin Card */}
+            <Card className="bg-white rounded-2xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow duration-200">
+              <CardHeader className="flex items-center justify-between">
+                <CardTitle className="text-xl font-semibold text-gray-800">ผู้ดูแลระบบ</CardTitle>
+                <ShieldCheck className="h-7 w-7 text-red-500" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{users.filter((u) => u.role === "admin").length}</div>
+                <div className="text-4xl font-bold text-gray-900">{users.filter((u) => u.role === "admin").length}</div>
               </CardContent>
             </Card>
 
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">นักวิเคราะห์</CardTitle>
-                <Shield className="h-4 w-4 text-blue-500" />
+            {/** Analyst Card */}
+            <Card className="bg-white rounded-2xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow duration-200">
+              <CardHeader className="flex items-center justify-between">
+                <CardTitle className="text-xl font-semibold text-gray-800">นักวิเคราะห์</CardTitle>
+                <Shield className="h-7 w-7 text-blue-500" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{users.filter((u) => u.role === "analyst").length}</div>
+                <div className="text-4xl font-bold text-gray-900">{users.filter((u) => u.role === "analyst").length}</div>
               </CardContent>
             </Card>
           </div>
+
+
+
+
+
 
           {/* User Management */}
           <Card>
@@ -346,7 +398,7 @@ export default function UsersPage() {
                           <SelectTrigger className="w-full border border-[#dedede] placeholder:opacity-40">
                             <SelectValue />
                           </SelectTrigger>
-                          <SelectContent>
+                          <SelectContent className="rounded-lg shadow-md">
                             <SelectItem value="viewer">ผู้ดู</SelectItem>
                             <SelectItem value="analyst">นักวิเคราะห์</SelectItem>
                             <SelectItem value="admin">ผู้ดูแลระบบ</SelectItem>
@@ -390,7 +442,7 @@ export default function UsersPage() {
                   <SelectTrigger className="w-40 border border-[#dedede]">
                     <SelectValue placeholder="บทบาท" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="rounded-lg shadow-md">
                     <SelectItem value="all">ทุกบทบาท</SelectItem>
                     <SelectItem value="admin">ผู้ดูแลระบบ</SelectItem>
                     <SelectItem value="analyst">นักวิเคราะห์</SelectItem>
@@ -401,7 +453,7 @@ export default function UsersPage() {
                   <SelectTrigger className="w-40 border border-[#dedede]">
                     <SelectValue placeholder="สถานะ" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="rounded-lg shadow-md">
                     <SelectItem value="all">ทุกสถานะ</SelectItem>
                     <SelectItem value="active">ใช้งาน</SelectItem>
                     <SelectItem value="inactive">ไม่ใช้งาน</SelectItem>
@@ -411,8 +463,8 @@ export default function UsersPage() {
               </div>
 
               {/* Users Table */}
-              <div className="rounded-md border">
-                <Table>
+              <div className="border rounded-lg">
+                <Table className="bg-white rounded-lg">
                   <TableHeader>
                     <TableRow>
                       <TableHead>ผู้ใช้</TableHead>

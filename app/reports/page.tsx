@@ -34,12 +34,20 @@ const monthlyData = [
   { month: "มิ.ย.", documents: 523, searches: 2680, users: 58 },
 ]
 
+// const documentTypeData = [
+//   { name: "กฎหมาย", value: 45, color: "hsl(var(--chart-1))" },
+//   { name: "ระเบียบ", value: 30, color: "hsl(var(--chart-2))" },
+//   { name: "ประกาศ", value: 15, color: "hsl(var(--chart-3))" },
+//   { name: "หนังสือเวียน", value: 10, color: "hsl(var(--chart-4))" },
+// ]
+
+// แบบมีสีสัน
 const documentTypeData = [
-  { name: "กฎหมาย", value: 45, color: "#8AC42D" },
-  { name: "ระเบียบ", value: 30, color: "#27A9F5" },
-  { name: "ประกาศ", value: 15, color: "#E3902D" },
-  { name: "หนังสือเวียน", value: 10, color: "#E34E2D" },
-]
+  { name: "PDF", value: 45, color: "#3B82F6" },      // ฟ้า
+  { name: "Word", value: 25, color: "#10B981" },     // เขียว
+  { name: "Excel", value: 20, color: "#F59E0B" },    // ส้ม
+  { name: "อื่น ๆ", value: 10, color: "#EF4444" },   // แดง
+];
 
 const performanceData = [
   { metric: "เวลาตอบสนองเฉลี่ย", value: "1.8s", target: "≤2s", status: "good" },
@@ -61,9 +69,9 @@ export default function ReportsPage() {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "good":
-        return <Badge className="bg-green-100 text-green-800">ดี</Badge>
+        return <Badge className="w-auto text-[14px] bg-green-100 text-green-800">ดี</Badge>
       case "warning":
-        return <Badge className="bg-yellow-100 text-yellow-800">เตือน</Badge>
+        return <Badge className="w-auto text-[14px] bg-yellow-100 text-yellow-800">เตือน</Badge>
       case "critical":
         return <Badge variant="destructive">วิกฤต</Badge>
       default:
@@ -75,11 +83,11 @@ export default function ReportsPage() {
     <SidebarProvider>
       <AppSidebar />
       <SidebarInset>
-        <AppHeader title={'รายงาน'}/>
+        <AppHeader title={'รายงาน'} />
 
         <div className="flex flex-1 flex-col gap-6 p-4">
           {/* Report Controls */}
-          <Card>
+          {/* <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <BarChart3 className="h-5 w-5" />
@@ -87,15 +95,16 @@ export default function ReportsPage() {
               </CardTitle>
               <CardDescription>เลือกประเภทรายงานและช่วงเวลาที่ต้องการ</CardDescription>
             </CardHeader>
+
             <CardContent>
               <div className="grid gap-4 md:grid-cols-5">
                 <div className="space-y-2 col-span-1">
                   <label className="text-sm font-medium">ประเภทรายงาน</label>
                   <Select value={reportType} onValueChange={setReportType}>
-                    <SelectTrigger className="w-full border border-[#dedede]">
+                    <SelectTrigger className="w-48 bg-white rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="rounded-lg shadow-md">
                       <SelectItem value="monthly">รายงานประจำเดือน</SelectItem>
                       <SelectItem value="quarterly">รายงานประจำไตรมาส</SelectItem>
                       <SelectItem value="yearly">รายงานประจำปี</SelectItem>
@@ -108,10 +117,10 @@ export default function ReportsPage() {
                 <div className="space-y-2 col-span-1">
                   <label className="text-sm font-medium">หน่วยงาน</label>
                   <Select value={selectedDepartment} onValueChange={setSelectedDepartment}>
-                    <SelectTrigger className="w-full border border-[#dedede]">
+                    <SelectTrigger className="w-48 bg-white rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="rounded-lg shadow-md">
                       <SelectItem value="all">ทุกหน่วยงาน</SelectItem>
                       <SelectItem value="secretary">สำนักงานเลขาธิการ</SelectItem>
                       <SelectItem value="legal">กองกฎหมาย</SelectItem>
@@ -152,7 +161,7 @@ export default function ReportsPage() {
                 </div>
               </div>
             </CardContent>
-          </Card>
+          </Card> */}
 
           {/* Performance Metrics */}
           <Card>
@@ -178,7 +187,7 @@ export default function ReportsPage() {
 
           {/* Charts */}
           <div className="grid gap-6 md:grid-cols-2">
-            <Card>
+            {/* <Card>
               <CardHeader>
                 <CardTitle>แนวโน้มการใช้งานรายเดือน</CardTitle>
                 <CardDescription>จำนวนเอกสาร การค้นหา และผู้ใช้งาน</CardDescription>
@@ -214,9 +223,12 @@ export default function ReportsPage() {
                   </ResponsiveContainer>
                 </ChartContainer>
               </CardContent>
-            </Card>
+            </Card> */}
 
-            <Card>
+
+
+
+            {/* <Card>
               <CardHeader>
                 <CardTitle>การแจกแจงประเภทเอกสาร</CardTitle>
                 <CardDescription>สัดส่วนประเภทเอกสารที่อัปโหลดในระบบ</CardDescription>
@@ -251,7 +263,118 @@ export default function ReportsPage() {
                   </ResponsiveContainer>
                 </ChartContainer>
               </CardContent>
+            </Card> */}
+
+
+            <Card className="rounded-2xl border border-gray-200 bg-white shadow-sm">
+              <CardHeader className="pb-4 border-b border-gray-100">
+                <CardTitle className="text-lg font-semibold text-gray-800">แนวโน้มการใช้งานรายเดือน</CardTitle>
+                <CardDescription className="text-sm text-gray-500">
+                  จำนวนเอกสาร การค้นหา และผู้ใช้งาน
+                </CardDescription>
+              </CardHeader>
+
+              <CardContent className="pt-4">
+                <ChartContainer
+                  config={{
+                    documents: { label: "เอกสาร", color: "#3B82F6" }, // blue
+                    searches: { label: "การค้นหา", color: "#10B981" }, // green
+                    users: { label: "ผู้ใช้งาน", color: "#F59E0B" }, // amber
+                  }}
+                  className="h-[300px] w-full"
+                >
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={monthlyData}>
+                      {/* Grid */}
+                      <CartesianGrid stroke="#E5E7EB" strokeDasharray="3 3" />
+
+                      {/* Axis */}
+                      <XAxis
+                        dataKey="month"
+                        stroke="#9CA3AF"
+                        tickLine={false}
+                        axisLine={{ stroke: "#D1D5DB" }}
+                      />
+                      <YAxis stroke="#9CA3AF" tickLine={false} axisLine={{ stroke: "#D1D5DB" }} />
+
+                      {/* Tooltip */}
+                      <ChartTooltip
+                        content={<ChartTooltipContent />}
+                      />
+
+                      {/* Lines */}
+                      <Line
+                        type="monotone"
+                        dataKey="documents"
+                        stroke="#3B82F6"
+                        strokeWidth={3}
+                        dot={{ r: 4, fill: "#3B82F6" }}
+                      />
+                      <Line
+                        type="monotone"
+                        dataKey="searches"
+                        stroke="#10B981"
+                        strokeWidth={3}
+                        dot={{ r: 4, fill: "#10B981" }}
+                      />
+                      <Line
+                        type="monotone"
+                        dataKey="users"
+                        stroke="#F59E0B"
+                        strokeWidth={3}
+                        dot={{ r: 4, fill: "#F59E0B" }}
+                      />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </ChartContainer>
+              </CardContent>
             </Card>
+
+
+
+            <Card className="rounded-2xl border border-gray-200 bg-white shadow-sm">
+              <CardHeader className="pb-4 border-b border-gray-100">
+                <CardTitle className="text-lg font-semibold text-gray-800">การแจกแจงประเภทเอกสาร</CardTitle>
+                <CardDescription className="text-sm text-gray-500">
+                  สัดส่วนประเภทเอกสารที่อัปโหลดในระบบ
+                </CardDescription>
+              </CardHeader>
+
+              <CardContent className="pt-4">
+                <ChartContainer
+                  config={{
+                    documents: { label: "เอกสาร" },
+                  }}
+                  className="h-[300px] w-full"
+                >
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie
+                        data={documentTypeData}
+                        cx="50%"
+                        cy="50%"
+                        innerRadius={40}       // ทำ donut style
+                        outerRadius={80}
+                        paddingAngle={3}       // เว้นช่วงเล็ก ๆ ระหว่าง slices
+                        labelLine={false}
+                        // label={({ name, percent }: any) => (
+                        //   <span className="text-gray-800 font-medium">{`${name} ${(percent * 100).toFixed(0)}%`}</span>
+                        // )}
+                        label={({ name, percent }: any) => `${name} ${(percent * 100).toFixed(0)}%`}
+                        dataKey="value"
+                        cornerRadius={4}       // มุมโค้งให้ Pie ดู modern
+                      >
+                        {documentTypeData.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={entry.color} stroke="#fff" strokeWidth={2} />
+                        ))}
+                      </Pie>
+                      <ChartTooltip content={<ChartTooltipContent />} />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </ChartContainer>
+              </CardContent>
+            </Card>
+
           </div>
 
           {/* Recent Reports */}
