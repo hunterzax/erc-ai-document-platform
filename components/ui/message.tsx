@@ -90,10 +90,10 @@ const MessageContent = ({
     //   })}
     // </Markdown>
     content?.split("\n").map((line, index) => (
-      <React.Fragment key={index}>
+      <div key={index} className="leading-[2]">
         {line}
         <br />
-      </React.Fragment>
+      </div>
     ))
   ) : (
     <div className={classNames} {...props}>

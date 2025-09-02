@@ -459,7 +459,7 @@ function ChatContent({
                     )}
                   >
                     {isAssistant ? ( // ฝั้่ง Bot ตอบ
-                      <div className="group flex w-full flex-col gap-0">
+                      <div className="group flex w-full flex-col gap-0 text-sm">
                         {isLastMessage && triggertyp ? typingMessage(message?.content)
                           :
                           <MessageContent
@@ -564,7 +564,7 @@ function ChatContent({
                       </div>
                     ) : (
                       <div className="group flex flex-col items-end gap-1">
-                        <MessageContent className="bg-muted text-primary max-w-[85%] rounded-3xl px-5 py-2.5 sm:max-w-[75%] text-sm">
+                        <MessageContent className="bg-muted text-primary max-w-[85%] rounded-3xl px-5 py-2.5 sm:max-w-[75%] text-sm leading-[2]">
                           {message.content}
                         </MessageContent>
                         <MessageActions
