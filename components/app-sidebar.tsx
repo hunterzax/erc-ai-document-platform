@@ -143,7 +143,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   <SidebarMenuButton asChild>
                     <a href={item.url} className={`${currentPath == item?.url ? '!bg-blue-500 text-white' : 'bg-transparent hover:!bg-gray-200 !text-black'} px-3 py-2`}>
                       <item.icon />
-                      <span>{item.title}</span>
+                      <span className="w-full">{item.title}</span>
                     </a>
                   </SidebarMenuButton>
                 </SidebarMenuItem>

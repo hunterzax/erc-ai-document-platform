@@ -414,7 +414,7 @@ function ChatContent({
         <ChatContainerRoot className="h-full">
           <ChatContainerContent className="space-y-0 px-5 py-12">
             {chatMessages.length === 0 ? (
-              <div className="text-center py-12 text-muted-foreground">
+              <div className="text-center py-12 text-muted-foreground anifade">
                 <MessageSquare className="h-12 w-12 mx-auto mb-4 opacity-50" />
                 <h3 className="text-lg font-medium mb-2">Start a new conversation</h3>
                 <p className="text-sm">Type a message below to begin chatting with AI</p>

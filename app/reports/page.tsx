@@ -85,7 +85,7 @@ export default function ReportsPage() {
       <SidebarInset>
         <AppHeader title={'รายงาน'} />
 
-        <div className="flex flex-1 flex-col gap-6 p-4">
+        <div className="flex flex-1 flex-col gap-6 p-4 anifade">
           {/* Report Controls */}
           {/* <Card>
             <CardHeader>

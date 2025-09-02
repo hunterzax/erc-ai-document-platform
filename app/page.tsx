@@ -54,7 +54,7 @@ export default function Page() {
         <AppHeader title={'แดชบอร์ด'}/>
         <div className="flex flex-1 flex-col gap-6 p-4">
           <div className="flex-1 overflow-auto">
-            <div className="flex flex-col gap-6">
+            <div className="flex flex-col gap-6 anifade">
               {/* KPI Cards Section */}
               <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
                 <Card>

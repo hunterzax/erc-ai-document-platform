@@ -251,7 +251,7 @@ export default function UsersPage() {
       <SidebarInset>
         <AppHeader title={'จัดการผู้ใช้'} />
 
-        <div className="flex flex-1 flex-col gap-6 p-4">
+        <div className="flex flex-1 flex-col gap-6 p-4 anifade">
 
           {/* User Statistics */}
           {/* <div className="grid gap-4 md:grid-cols-4">

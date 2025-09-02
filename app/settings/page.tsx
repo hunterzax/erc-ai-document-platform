@@ -809,7 +809,7 @@ export default function SettingsPage() {
       <SidebarInset>
         <AppHeader title={'ตั้งค่า'} />
 
-        <div className="flex flex-1 flex-col gap-6 p-4">
+        <div className="flex flex-1 flex-col gap-6 p-4 anifade">
           <div className="grid grid-cols-4 gap-6">
             <div className="flex flex-col flex-1 col-span-1 gap-3 border-r border-[#ebebeb] pr-5">
               {menuSetting?.map((item: any, index: any) => {
