@@ -52,16 +52,27 @@ import {
   Settings,
   MessageSquare,
   Badge,
+  MessageCircle,
+  SeparatorHorizontal,
+  ArrowBigDownDash,
 } from "lucide-react"
 import { useRef, useState, useEffect } from "react"
 import { AppSidebar } from "@/components/app-sidebar"
 import { AppHeader } from "@/components/header-bar"
+import { Skeleton } from "@/components/ui/skeleton"
+import { Card, CardContent } from "@/components/ui/card"
+import { Separator } from "@radix-ui/react-separator"
+import { Textarea } from "@/components/ui/textarea"
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
+import axios from "axios"
+const tokenURL = process.env.NEXT_PUBLIC_N8N_BASE_URL;
 
 interface ChatMessage {
   id: number
   role: "user" | "assistant"
   content: string
-  timestamp?: string
+  timestamp?: string,
+  ref?: any
 }
 
 interface ChatSession {
@@ -87,7 +98,9 @@ function ChatSidebar({
     <div className="w-full h-[calc(100dvh-65px)] overflow-hidden border-r border-[#dedede]">
       <div className="flex flex-row items-center justify-between gap-2 px-2 py-4">
         <div className="flex flex-row items-center gap-2 px-2">
-          <div className="bg-primary/10 size-8 rounded-md"></div>
+          <div className="bg-blue-500 size-8 rounded-md flex items-center justify-center text-white">
+            <MessageCircle size={16} />
+          </div>
           <div className="text-md font-base text-primary tracking-tight">
             AI Chat
           </div>
@@ -105,28 +118,6 @@ function ChatSidebar({
       </div>
     </div>
   )
-  return (
-    <Sidebar>
-      <SidebarHeader className="flex flex-row items-center justify-between gap-2 px-2 py-4">
-        <div className="flex flex-row items-center gap-2 px-2">
-          <div className="bg-primary/10 size-8 rounded-md"></div>
-          <div className="text-md font-base text-primary tracking-tight">
-            AI Chat
-          </div>
-        </div>
-        <Button variant="ghost" className="size-8">
-          <History className="size-4" />
-        </Button>
-      </SidebarHeader>
-      <SidebarContent className="pt-4">
-        <ChatHistory
-          onSessionSelect={onSessionSelect}
-          onNewChat={onNewChat}
-          currentSessionId={currentSessionId}
-        />
-      </SidebarContent>
-    </Sidebar>
-  )
 }
 
 function ChatContent({
@@ -141,7 +132,9 @@ function ChatContent({
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([])
   const [sessionTitle, setSessionTitle] = useState("New Chat")
   const chatContainerRef = useRef<HTMLDivElement>(null)
-  //   const [inputValue, setInputValue] = useState("")
+
+  const [triggertyp, settriggertyp] = useState(false);
+
   const handleSend = () => {
     if (prompt.trim()) {
       console.log("Sending:", prompt)
@@ -236,6 +229,7 @@ function ChatContent({
     const userPrompt = prompt.trim()
     setPrompt("")
     setIsLoading(true)
+    settriggertyp(false); //trigger last chat for new chat
 
     // Add user message immediately
     const newUserMessage: ChatMessage = {
@@ -262,7 +256,6 @@ function ChatContent({
           messages: updatedMessages
         }),
       })
-
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}))
         throw new Error(errorData.error || 'Failed to get response from AI')
@@ -276,6 +269,7 @@ function ChatContent({
         id: updatedMessages.length + 1,
         role: "assistant",
         content: JSON.parse(data.message).output || JSON.stringify(data.message),
+        ref: JSON.parse(data?.message)?.reference,
         timestamp: new Date().toISOString()
       }
 
@@ -317,6 +311,7 @@ function ChatContent({
       await saveSession(finalMessages)
     } finally {
       setIsLoading(false)
+      settriggertyp(true);
     }
   }
 
@@ -354,6 +349,40 @@ function ChatContent({
 
   const handleSessionUpdate = (session: ChatSession) => {
     onSessionUpdate(session)
+  }
+
+  const downloadPDF = async (file_name: any) => {
+    try {
+      const response = await axios.get(`${tokenURL}/raw_docs_pdf/${file_name}`, {
+        responseType: 'blob', // 👈 สำคัญมาก!
+      });
+
+      if (response.status === 200) {
+        const url = window.URL.createObjectURL(response.data); // ใช้ response.data ตรงๆ
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `${file_name}.pdf`; // ชื่อไฟล์ที่จะดาวน์โหลด
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        window.URL.revokeObjectURL(url); // ♻️ free memory
+      }
+    } catch (error) {
+      console.error("Download failed:", error);
+    }
+  }
+
+  const typingMessage: any = (txt: any) => {
+    return (
+      <div className="w-full min-w-full">
+        <ResponseStream
+          textStream={txt}
+          mode="typewriter"
+          speed={20}
+          className="text-sm leading-[2]"
+        />
+      </div>
+    )
   }
 
   return (
@@ -417,8 +446,8 @@ function ChatContent({
                 </div>
               </div>
             ) : (
-              chatMessages.map((message, index) => {
-                const isAssistant = message.role === "assistant"
+              chatMessages?.map((message, index) => {
+                const isAssistant = message?.role === "assistant"
                 const isLastMessage = index === chatMessages.length - 1
 
                 return (
@@ -431,19 +460,73 @@ function ChatContent({
                   >
                     {isAssistant ? ( // ฝั้่ง Bot ตอบ
                       <div className="group flex w-full flex-col gap-0">
-                        <MessageContent
-                          className="text-foreground prose flex-1 rounded-lg bg-transparent p-0 text-sm"
-                          markdown
-                        >
-                          {message.content}
-                          {/* <ResponseStream
-                                textStream={message.content}
-                                mode="typewriter"
-                                speed={20}
-                                className="text-sm"
-                            /> */}
-                          {/* {displayedText} */}
-                        </MessageContent>
+                        {isLastMessage && triggertyp ? typingMessage(message?.content)
+                          :
+                          <MessageContent
+                            className="text-foreground prose flex-1 rounded-lg bg-transparent p-0 text-sm leading-[2]"
+                            markdown
+                          >
+                            {message?.content}
+                          </MessageContent>
+                        }
+                        {message?.ref && message?.ref?.raw_document?.context && (
+                          <div className="pt-5">
+                            <div className="text-sm mb-5 border-t border-[#eeeeee] pt-5">
+                              <div className="mb-3">{'อ้างอิงจาก'}</div>
+                              {/* <a href="#" className="hover:text-blue-400 duration-200 ease-in-out italic">{message?.ref?.raw_document?.file_name}</a> */}
+                              <Accordion
+                                type="single"
+                                collapsible
+                                className="w-full"
+                              >
+                                <AccordionItem value={`itemx`} key={index} className="group">
+                                  <AccordionTrigger
+                                    className="p-2 bg-transparent
+                                    data-[state='open']:!bg-[#dfdfdf] rounded-none data-[state='open']:!rounded-t-lg text-sm italic 
+                                    flex justify-start items-center text-left hover:text-blue-500"
+                                  >
+                                    {message?.ref?.raw_document?.file_name}
+                                  </AccordionTrigger>
+                                  <AccordionContent className="flex flex-col gap-4 text-balance p-4 bg-[#eeeeee] italic shadow-lg rounded-b-lg">
+                                    <textarea
+                                      data-slot="textarea"
+                                      className={cn(
+                                        "placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:bg-input/30 flex field-sizing-content min-h-16 w-full rounded-md border bg-transparent px-3 py-2 text-base border-none shadow-none outline-none md:text-sm focus-visible:outline-none focus-visible:ring-0 focus:outline-none focus:!shadow-none disabled:cursor-text disabled:!text-gray-600 disabled:opacity-100",
+
+                                      )}
+                                      disabled
+                                      value={message?.ref?.raw_document?.context}
+                                      readOnly
+
+                                    />
+                                    <div className="flex justify-end">
+                                      <button
+                                        className="bg-[#117bf5] p-2 rounded-md flex items-center gap-2 text-white"
+                                        onClick={() => downloadPDF(message?.ref?.raw_document?.file_name)}
+                                      >
+                                        <ArrowBigDownDash />
+                                        <span>{'ดาวน์โหลด PDF'}</span>
+                                      </button>
+                                    </div>
+                                  </AccordionContent>
+                                </AccordionItem>
+                              </Accordion>
+                              {/* <div className="bg-[#e7e7e7] rounded-md text-[#696969]">
+                                <textarea
+                                  data-slot="textarea"
+                                  className={cn(
+                                    "border-input placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:bg-input/30 flex field-sizing-content min-h-16 w-full rounded-md border bg-transparent px-3 py-2 text-base shadow-xs transition-[color,box-shadow] outline-none md:text-sm focus-visible:outline-none focus-visible:ring-0 disabled:opacity-50 focus:outline-none focus:!shadow-none disabled:cursor-pointer",
+                                    
+                                  )}
+                                  disabled
+                                  value={message?.ref?.raw_document?.context}
+                                  readOnly
+                                  
+                                />
+                              </div> */}
+                            </div>
+                          </div>
+                        )}
                         <MessageActions
                           className={cn(
                             "-ml-2.5 flex gap-0 opacity-0 transition-opacity duration-150 group-hover:opacity-100",
@@ -523,6 +606,19 @@ function ChatContent({
                 )
               })
             )}
+
+            {isLoading &&
+              <div className="mx-auto flex w-full max-w-3xl flex-col gap-2 px-6 anifade">
+                <div className="flex gap-3 justify-start ">
+                  <Skeleton className="w-5 h-5 rounded-full mt-1 bg-gray-500" />
+                  <div className="space-y-2 w-full">
+                    <Skeleton className="h-2 w-3/4 bg-gray-500" />
+                    <Skeleton className="h-2 w-3/5 bg-gray-500" />
+                    <Skeleton className="h-2 w-1/2 bg-gray-500" />
+                  </div>
+                </div>
+              </div>
+            }
           </ChatContainerContent>
           {chatMessages.length > 0 && (
             <div className="absolute bottom-4 left-1/2 flex w-full max-w-3xl -translate-x-1/2 justify-end px-5">

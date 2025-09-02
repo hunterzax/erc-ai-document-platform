@@ -159,7 +159,7 @@ export function ChatHistory({ onSessionSelect, onNewChat, currentSessionId, refr
       {/* Header */}
       <div className="p-3 border-b">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold">Chat History</h2>
+          <h2 className="text-md font-semibold">Chat History</h2>
           <div className="flex items-center gap-2">
             <Button
               onClick={loadChatHistory}

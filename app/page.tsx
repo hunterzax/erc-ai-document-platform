@@ -54,10 +54,10 @@ export default function Page() {
         <AppHeader title={'แดชบอร์ด'}/>
         <div className="flex flex-1 flex-col gap-6 p-4">
           <div className="flex-1 overflow-auto">
-            <div className="flex flex-col gap-6 p-6">
+            <div className="flex flex-col gap-6">
               {/* KPI Cards Section */}
               <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-                <Card>
+                <Card className="bg-white">
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                     <CardTitle className="text-sm font-medium">เอกสารทั้งหมด</CardTitle>
                     <FileText className="h-4 w-4 text-muted-foreground" />
@@ -70,7 +70,7 @@ export default function Page() {
                   </CardContent>
                 </Card>
 
-                <Card>
+                <Card className="bg-white">
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                     <CardTitle className="text-sm font-medium">ความแม่นยำ OCR</CardTitle>
                     <CheckCircle className="h-4 w-4 text-muted-foreground" />
@@ -82,7 +82,7 @@ export default function Page() {
                   </CardContent>
                 </Card>
 
-                <Card>
+                <Card className="bg-white">
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                     <CardTitle className="text-sm font-medium">ผู้ใช้งานออนไลน์</CardTitle>
                     <Users className="h-4 w-4 text-muted-foreground" />
@@ -93,7 +93,7 @@ export default function Page() {
                   </CardContent>
                 </Card>
 
-                <Card>
+                <Card className="bg-white">
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                     <CardTitle className="text-sm font-medium">เวลาตอบสนองเฉลี่ย</CardTitle>
                     <Clock className="h-4 w-4 text-muted-foreground" />
@@ -111,7 +111,7 @@ export default function Page() {
 
               {/* Additional Information Section */}
               <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-                <Card className="col-span-3">
+                <Card className="col-span-3 bg-white">
                   <CardHeader>
                     <CardTitle>คำค้นหายอดนิยม</CardTitle>
                     <CardDescription>คำค้นหาที่ใช้บ่อยที่สุดในระบบ</CardDescription>
@@ -130,7 +130,7 @@ export default function Page() {
                   </CardContent>
                 </Card>
 
-                <Card className="col-span-4">
+                <Card className="col-span-4 bg-white">
                   <CardHeader>
                     <CardTitle>สถานะระบบ</CardTitle>
                     <CardDescription>ภาพรวมสถานะการทำงานของระบบต่างๆ</CardDescription>
