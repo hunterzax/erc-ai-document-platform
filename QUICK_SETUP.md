@@ -128,3 +128,4 @@ cat .env.local
 4. เริ่มการสนทนา!
 
 หากมีปัญหา ให้ดูที่ Webhook Status component ใน header ด้านขวา 😊
+

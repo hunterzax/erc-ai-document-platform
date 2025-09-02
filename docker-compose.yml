@@ -33,3 +33,4 @@ networks:
 volumes:
   n8n_data:
     driver: local
+
