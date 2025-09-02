@@ -1,0 +1,63 @@
+{
+  "name": "AI Chat Workflow",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "webhook-trigger",
+      "name": "Webhook Trigger",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [240, 300],
+      "webhookId": "chat-webhook"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Extract messages from webhook data\nconst messages = $input.first().json.messages || [];\nconst systemPrompt = $input.first().json.systemPrompt || 'You are a helpful AI assistant.';\n\n// Create a simple response based on the last user message\nconst lastMessage = messages[messages.length - 1];\nlet response = '';\n\nif (lastMessage && lastMessage.role === 'user') {\n  const userInput = lastMessage.content;\n  \n  // Simple response logic - you can replace this with actual AI integration\n  if (userInput.toLowerCase().includes('hello') || userInput.toLowerCase().includes('hi')) {\n    response = 'Hello! How can I help you today?';\n  } else if (userInput.toLowerCase().includes('help')) {\n    response = 'I\\'m here to help! What would you like to know?';\n  } else if (userInput.toLowerCase().includes('code') || userInput.toLowerCase().includes('programming')) {\n    response = 'I can help you with programming questions! What specific language or problem are you working on?';\n  } else {\n    response = `I received your message: \"${userInput}\". This is a sample response from n8n. You can integrate with actual AI services like OpenAI, Claude, or other LLMs here.`;\n  }\n}\n\n// Return the response\nreturn {\n  response: response,\n  timestamp: new Date().toISOString(),\n  messageCount: messages.length,\n  systemPrompt: systemPrompt\n};"
+      },
+      "id": "process-message",
+      "name": "Process Message",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {}
+      },
+      "id": "respond",
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [680, 300]
+    }
+  ],
+  "connections": {
+    "Webhook Trigger": {
+      "main": [
+        [
+          {
+            "node": "Process Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Process Message": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {},
+  "versionId": "1"
+}
