@@ -24,6 +24,9 @@ import { useState, useCallback, useEffect } from "react"
 import { useDropzone } from "react-dropzone"
 import { useToast } from "@/hooks/use-toast"
 import { AppHeader } from "@/components/header-bar"
+import PdfViewer from "@/components/ui/pdfviewer"
+import axios from "axios"
+const tokenURL = process.env.NEXT_PUBLIC_N8N_BASE_URL;
 
 interface UploadedFile {
   id: string
@@ -95,81 +98,123 @@ export default function UploadPage() {
 
   const processFile = async (file: UploadedFile, originalFile: File) => {
     try {
-      // Create FormData for upload
-      const formData = new FormData()
-      formData.append('file', originalFile)
 
-      // Upload to our API
-      const response = await fetch('/api/upload', {
-        method: 'POST',
-        body: formData,
-      })
-
-      if (!response.ok) {
-        throw new Error('Upload failed')
-      }
-
-      const result = await response.json()
-
-      // Get image dimensions if it's an image file
-      let dimensions: { width: number, height: number, aspectRatio: number } | undefined
-      if (originalFile.type.startsWith('image/')) {
-        dimensions = await getImageDimensions(originalFile)
-      }
+      setisLoading(true);
 
       console.log(">>> file", file)
+      console.log(">>> originalFile", originalFile)
 
-      const newFile: any = {
-        id: file?.id,
-        status: "completed",
-        progress: 100,
-        ocrResult: result.data.ocrResult,
-        extractedText: result.data.ocrResult?.text || 'ไม่สามารถแยกข้อความได้',
-        fileUrl: URL.createObjectURL(originalFile),
-        dimensions: dimensions,
-        size: file?.size,
-        name: file?.name,
-        type: file?.type
+      let data = new FormData();
+      data.append('file', originalFile);
+      data.append('tags', 'กฏหมาย,กฏหมายพลังงาน');
+
+      let config = {
+        method: 'post',
+        maxBodyLength: Infinity,
+        url: `${tokenURL}/upload_pdf`,
+        headers: {
+          "content-type": "multipart/form-data",
+        },
+        data: data
+      };
+
+      const postOCR = await axios.request(config);
+      if (postOCR?.status == 200) {
+        // const newFile: any = {
+        //   status: "completed",
+        //   progress: 100,
+        //   ocrResult: result.data.ocrResult,
+        //   extractedText: result.data.ocrResult?.text || 'ไม่สามารถแยกข้อความได้',
+        //   fileUrl: URL.createObjectURL(originalFile),
+        //   dimensions: dimensions,
+        //   size: file?.size,
+        //   name: file?.name,
+        //   type: file?.type
+        // }
+
+        console.log(">>> postOCR", postOCR)
+        setTimeout(() => {
+          getOCR(`${postOCR?.data?.pdf_name}.pdf`)
+          setisLoading(false);
+        }, 100);
       }
-      // Update file status to completed
-      setFiles((prev) =>
-        prev.map((f) =>
-          f.id === file.id
-            ? {
-              ...f,
-              status: "completed",
-              progress: 100,
-              ocrResult: result.data.ocrResult,
-              extractedText: result.data.ocrResult?.text || 'ไม่สามารถแยกข้อความได้',
-              fileUrl: URL.createObjectURL(originalFile),
-              dimensions: dimensions
-            }
-            : f
-        )
-      )
 
-      setSelectedFile(newFile);
+      // // Create FormData for upload
+      // const formData = new FormData()
+      // formData.append('file', originalFile)
 
-      toast({
-        title: "อัพโหลดสำเร็จ",
-        description: `ไฟล์ ${file.name} ถูกอัพโหลดและประมวลผล OCR เรียบร้อยแล้ว`,
-      })
+      // // Upload to our API
+      // const response = await fetch('/api/upload', {
+      //   method: 'POST',
+      //   body: formData,
+      // })
 
+      // if (!response.ok) {
+      //   throw new Error('Upload failed')
+      // }
+
+      // const result = await response.json()
+
+      // console.log(">>> result", result)
+
+      // // Get image dimensions if it's an image file
+      // let dimensions: { width: number, height: number, aspectRatio: number } | undefined
+      // if (originalFile.type.startsWith('image/')) {
+      //   dimensions = await getImageDimensions(originalFile)
+      // }
+
+      // const newFile: any = {
+      //   id: file?.id,
+      //   status: "completed",
+      //   progress: 100,
+      //   ocrResult: result.data.ocrResult,
+      //   extractedText: result.data.ocrResult?.text || 'ไม่สามารถแยกข้อความได้',
+      //   fileUrl: URL.createObjectURL(originalFile),
+      //   dimensions: dimensions,
+      //   size: file?.size,
+      //   name: file?.name,
+      //   type: file?.type
+      // }
+      // // Update file status to completed
+      // setFiles((prev) =>
+      //   prev.map((f) =>
+      //     f.id === file.id
+      //       ? {
+      //         ...f,
+      //         status: "completed",
+      //         progress: 100,
+      //         ocrResult: result.data.ocrResult,
+      //         extractedText: result.data.ocrResult?.text || 'ไม่สามารถแยกข้อความได้',
+      //         fileUrl: URL.createObjectURL(originalFile),
+      //         dimensions: dimensions
+      //       }
+      //       : f
+      //   )
+      // )
+
+      // setSelectedFile(newFile);
+
+      // toast({
+      //   title: "อัพโหลดสำเร็จ",
+      //   description: `ไฟล์ ${file.name} ถูกอัพโหลดและประมวลผล OCR เรียบร้อยแล้ว`,
+      // })
+
+      // getOCR();
     } catch (error) {
-      console.error('Error processing file:', error)
-      setFiles((prev) =>
-        prev.map((f) =>
-          f.id === file.id
-            ? { ...f, status: "error", progress: 0 }
-            : f
-        )
-      )
+      // console.error('Error processing file:', error)
+      // setFiles((prev) =>
+      //   prev.map((f) =>
+      //     f.id === file.id
+      //       ? { ...f, status: "error", progress: 0 }
+      //       : f
+      //   )
+      // )
 
-      toast({
-        title: "เกิดข้อผิดพลาด",
-        description: `ไม่สามารถประมวลผลไฟล์ ${file.name} ได้`,
-        variant: "destructive",
-      })
+      // toast({
+      //   title: "เกิดข้อผิดพลาด",
+      //   description: `ไม่สามารถประมวลผลไฟล์ ${file.name} ได้`,
+      //   variant: "destructive",
+      // })
     }
   }
 
@@ -331,7 +376,31 @@ export default function UploadPage() {
     }
   }
 
-  console.log(">>> selectedFile", selectedFile)
+  const [isLoading, setisLoading] = useState<boolean>(true);
+
+  const getOCR = async (filename: any) => {
+    try {
+      const getData = await axios.get(`${tokenURL}/qdrant/file_name/docs_section_single/${filename}`);
+
+      console.log(">>> getData", getData);
+    } catch (error: any) {
+      // ❌ กรณีเกิดข้อผิดพลาด
+      if (axios.isAxiosError(error)) {
+        if (error.response) {
+          // console.error("❌ Server error:", error.response.status);
+        } else if (error.request) {
+          // console.error("❌ Network error: No response received.");
+        } else {
+          // console.error("❌ Axios config error:", error.message);
+        }
+      } else {
+        // console.error("❌ Unexpected error:", error);
+      }
+
+      // setdataList([]);
+      // setisLoading(false);
+    }
+  }
 
   return (
     <SidebarProvider>
@@ -462,7 +531,10 @@ export default function UploadPage() {
                 <CardDescription>ภาพที่อัพโหลด</CardDescription>
               </CardHeader>
               <CardContent className="flex-1 flex flex-col">
-                {selectedFile && selectedFile.fileUrl && selectedFile.type.startsWith("image/") ? (
+                <div className="overflow-y-auto max-h-screen custom-scroll">
+                  <PdfViewer pdfUrl={selectedFile ? selectedFile.fileUrl : ''} />
+                </div>
+                {/* {selectedFile && selectedFile.fileUrl && selectedFile.type.startsWith("image/") ? (
                   <div className="flex-1 flex items-center justify-center">
                     <img
                       src={selectedFile.fileUrl}
@@ -485,7 +557,7 @@ export default function UploadPage() {
                       <p>เลือกไฟล์เพื่อดูภาพ</p>
                     </div>
                   </div>
-                )}
+                )} */}
 
                 {/* File List */}
                 {files.length > 0 && (
