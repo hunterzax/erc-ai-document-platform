@@ -184,7 +184,7 @@ export function ChatHistory({ onSessionSelect, onNewChat, currentSessionId, refr
             placeholder="Search chats..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10 border border-[#dedede]"
+            className="pl-10 border border-[#dedede] placeholder:opacity-40"
           />
         </div>
       </div>

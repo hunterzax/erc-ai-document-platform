@@ -27,6 +27,7 @@ import { AppHeader } from "@/components/header-bar"
 import PdfViewer from "@/components/ui/pdfviewer"
 import axios from "axios"
 import { mock_data_ocr_1, mock_data_ocr_2 } from "./mockDataK"
+import { AIConfigModal } from "@/components/byk/ai_setting_btn"
 interface ImageItem {
   source: string;
   typhoon_ocr: string;
@@ -575,15 +576,16 @@ export default function UploadPage() {
           <div className="grid grid-cols-4 gap-6 h-[600px]">
 
             {/* Top-Left: Drop files here + Progress */}
-            <Card className="flex flex-col-2 col-span-3 bg-white">
+            <Card className="flex flex-col-2 col-span-3">
               <CardHeader>
                 <CardTitle>อัปโหลดเอกสาร</CardTitle>
                 <CardDescription>รองรับไฟล์ PDF, Word, และรูปภาพ</CardDescription>
               </CardHeader>
-              <CardContent className="flex-1 flex flex-col">
+              <CardContent className="grid grid-cols-3 gap-5">
                 <div
                   {...getRootProps()}
-                  className={`border border-dashed rounded-lg p-6 text-center cursor-pointer transition-colors flex-1 flex flex-col items-center justify-center hover:bg-blue-200/30 ${isDragActive ? "border-primary bg-primary/5" : "border-muted-foreground/25 hover:border-primary/50"}`}
+                  className={`col-span-2 border border-dashed rounded-lg p-6 text-center cursor-pointer transition-colors flex-1 flex flex-col items-center justify-center hover:bg-blue-200/30 ${isDragActive ? "border-primary bg-primary/5" : "border-muted-foreground/25 hover:border-primary/50"
+                    }`}
                 >
                   <input {...getInputProps()} />
                   <Upload className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
@@ -613,11 +615,14 @@ export default function UploadPage() {
                     </div>
                   )}
                 </div>
+                <div>
+                  <AIConfigModal mode='form'/>
+                </div>
               </CardContent>
             </Card>
 
             {/* Top-Right: Document Detail */}
-            <Card className="flex flex-col col-span-1 bg-white">
+            <Card className="flex flex-col col-span-1">
               <CardHeader>
                 <CardTitle>Document Detail</CardTitle>
                 <CardDescription>ข้อมูลเอกสาร</CardDescription>

@@ -105,9 +105,9 @@ function ChatSidebar({
             AI Chat
           </div>
         </div>
-        <Button variant="ghost" className="size-8">
+        {/* <Button variant="ghost" className="size-8">
           <History className="size-4" />
-        </Button>
+        </Button> */}
       </div>
       <div className="overflow-x-auto h-[calc(100dvh-135px)] custom-scroll">
         <ChatHistory
@@ -262,8 +262,8 @@ function ChatContent({
       }
 
       const data = await response.json()
-      console.log(data);
-      console.log(JSON.parse(data.message));
+      // console.log(data);
+      // console.log(JSON.parse(data.message));
 
       const assistantResponse: ChatMessage = {
         id: updatedMessages.length + 1,
@@ -459,7 +459,7 @@ function ChatContent({
                     )}
                   >
                     {isAssistant ? ( // ฝั้่ง Bot ตอบ
-                      <div className="group flex w-full flex-col gap-0">
+                      <div className="group flex w-full flex-col gap-0 text-sm">
                         {isLastMessage && triggertyp ? typingMessage(message?.content)
                           :
                           <MessageContent
@@ -564,7 +564,7 @@ function ChatContent({
                       </div>
                     ) : (
                       <div className="group flex flex-col items-end gap-1">
-                        <MessageContent className="bg-muted text-primary max-w-[85%] rounded-3xl px-5 py-2.5 sm:max-w-[75%] text-sm">
+                        <MessageContent className="bg-muted text-primary max-w-[85%] rounded-3xl px-5 py-2.5 sm:max-w-[75%] text-sm leading-[2]">
                           {message.content}
                         </MessageContent>
                         <MessageActions
@@ -642,7 +642,7 @@ function ChatContent({
             <div className="flex flex-col">
               <PromptInputTextarea
                 placeholder="ป้อนคำถามมาได้...."
-                className="min-h-[44px] pt-3 pl-4 leading-[1.3] sm:text-base md:text-base text-sm"
+                className="min-h-[44px] pt-3 pl-4 leading-[1.3] sm:text-base md:text-base text-sm placeholder:opacity-40"
               />
 
               <PromptInputActions className="mt-5 flex w-full items-center justify-between gap-2 px-3 pb-3 text-sm">
