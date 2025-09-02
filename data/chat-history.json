@@ -64,5 +64,39 @@
     ],
     "createdAt": "2025-09-02T11:35:36.724Z",
     "updatedAt": "2025-09-02T11:37:35.928Z"
+  },
+  {
+    "id": "session_1756828905085_s1q3txwck",
+    "title": "asd",
+    "messages": [
+      {
+        "id": 1,
+        "role": "user",
+        "content": "asd",
+        "timestamp": "2025-09-02T16:01:45.037Z"
+      }
+    ],
+    "createdAt": "2025-09-02T16:01:45.085Z",
+    "updatedAt": "2025-09-02T16:01:45.085Z"
+  },
+  {
+    "id": "session_1756828906415_ubki6pwr1",
+    "title": "asd",
+    "messages": [
+      {
+        "id": 1,
+        "role": "user",
+        "content": "asd",
+        "timestamp": "2025-09-02T16:01:45.037Z"
+      },
+      {
+        "id": 2,
+        "role": "assistant",
+        "content": "Sorry, I encountered an error. The webhook is not registered ",
+        "timestamp": "2025-09-02T16:01:46.399Z"
+      }
+    ],
+    "createdAt": "2025-09-02T16:01:46.415Z",
+    "updatedAt": "2025-09-02T16:01:46.415Z"
   }
 ]

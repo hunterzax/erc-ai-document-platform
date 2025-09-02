@@ -16,9 +16,13 @@ import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { Badge } from "@/components/ui/badge"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Brain, FileText, Sparkles, Copy, Download } from "lucide-react"
+import { Brain, FileText, Sparkles, Copy, Download, Loader2 } from "lucide-react"
 import { useState } from "react"
 import { AppHeader } from "@/components/header-bar"
+
+const tokenURLSmall = process.env.NEXT_PUBLIC_N8N_BASE_URL_SMALL;
+const tokenURLMedium = process.env.NEXT_PUBLIC_N8N_BASE_URL_MEDIUM;
+
 
 export default function SummarizePage() {
   const [inputText, setInputText] = useState("")
@@ -26,24 +30,76 @@ export default function SummarizePage() {
   const [summary, setSummary] = useState("")
   const [isGenerating, setIsGenerating] = useState(false)
 
+  const [copied, setCopied] = useState(false)
+
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(summary)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000) // reset status
+    } catch (err) {
+      console.error("Failed to copy:", err)
+    }
+  }
+
+
   const handleSummarize = async () => {
     setIsGenerating(true)
+
+
+    // summaryType
+    const axios = require('axios');
+    let data = JSON.stringify({
+      "messages": [
+        {
+          "id": 1,
+          "role": "user",
+          "timestamp": "2025-09-02T02:37:24.230Z",
+          "content": inputText
+        }
+      ]
+    });
+    // console.log('data', data)
+
+    let config = {
+      method: 'post',
+      maxBodyLength: Infinity,
+      url: summaryType == 'long' ? tokenURLMedium : tokenURLSmall,
+      headers: {
+        // '': '',
+        'Content-Type': 'application/json'
+      },
+      data: data
+    };
+    // console.log('config', config)
+
+    let res_summary = await axios.request(config)
+    // console.log('res_summary', res_summary)
+
+
     // Simulate AI processing
     setTimeout(() => {
+      // const mockSummary =
+      //   summaryType === "short" ? "สรุปสั้น: เอกสารนี้เกี่ยวข้องกับการจัดซื้อจัดจ้างภาครัฐ โดยเน้นหลักการโปร่งใสและประสิทธิภาพในการดำเนินงาน"
+      //     : "สรุปยาว: เอกสารนี้เป็นพระราชบัญญัติที่ควบคุมการจัดซื้อจัดจ้างของหน่วยงานภาครัฐ มีวัตถุประสงค์เพื่อให้การดำเนินงานเป็นไปอย่างมีประสิทธิภาพ โปร่งใส และตรวจสอบได้ โดยกำหนดหลักเกณฑ์และวิธีการปฏิบัติที่ชัดเจน รวมถึงการกำหนดบทลงโทษสำหรับผู้ที่ฝ่าฝืน"
       const mockSummary =
-        summaryType === "short"
-          ? "สรุปสั้น: เอกสารนี้เกี่ยวข้องกับการจัดซื้อจัดจ้างภาครัฐ โดยเน้นหลักการโปร่งใสและประสิทธิภาพในการดำเนินงาน"
-          : "สรุปยาว: เอกสารนี้เป็นพระราชบัญญัติที่ควบคุมการจัดซื้อจัดจ้างของหน่วยงานภาครัฐ มีวัตถุประสงค์เพื่อให้การดำเนินงานเป็นไปอย่างมีประสิทธิภาพ โปร่งใส และตรวจสอบได้ โดยกำหนดหลักเกณฑ์และวิธีการปฏิบัติที่ชัดเจน รวมถึงการกำหนดบทลงโทษสำหรับผู้ที่ฝ่าฝืน"
+        summaryType === "short" ? `สรุปสั้น: ${res_summary?.data?.output}`
+          : `สรุปยาว: ${res_summary?.data?.output}`
       setSummary(mockSummary)
       setIsGenerating(false)
     }, 2000)
+  }
+
+  const handleSelectType = (e: any) => {
+    // console.log('handleSelectType', e)
+    setSummaryType(e)
   }
 
   return (
     <SidebarProvider>
       <AppSidebar />
       <SidebarInset>
-        <AppHeader title={'สรุปด้วย AI'}/>
+        <AppHeader title={'สรุปด้วย AI'} />
 
         <div className="flex flex-1 flex-col gap-6 p-4 anifade">
           <div className="grid gap-6 lg:grid-cols-2">
@@ -67,26 +123,60 @@ export default function SummarizePage() {
                 <div className="flex items-center gap-4">
                   <div className="space-y-2">
                     <label className="text-sm font-medium">ประเภทการสรุป</label>
-                    <Select value={summaryType} onValueChange={setSummaryType}>
+
+
+                    {/* <Select value={summaryType} onValueChange={setSummaryType} > */}
+                    <Select
+                      value={summaryType}
+                      onValueChange={(e: any) => handleSelectType(e)}
+
+                    >
                       <SelectTrigger className="w-40 border border-[#dedede]">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="short">สรุปสั้น</SelectItem>
                         <SelectItem value="long">สรุปยาว</SelectItem>
-                        <SelectItem value="bullet">จุดสำคัญ</SelectItem>
-                        <SelectItem value="keywords">คำสำคัญ</SelectItem>
+                        {/* <SelectItem value="bullet">จุดสำคัญ</SelectItem>
+                        <SelectItem value="keywords">คำสำคัญ</SelectItem> */}
                       </SelectContent>
                     </Select>
                   </div>
 
-                  <Button onClick={handleSummarize} disabled={!inputText.trim() || isGenerating} className="mt-6">
+                  {/* <Button onClick={handleSummarize} disabled={!inputText.trim() || isGenerating} className="mt-6">
                     <Brain className="h-4 w-4 mr-2" />
                     {isGenerating ? "กำลังสรุป..." : "สรุปด้วย AI"}
+                  </Button> */}
+
+                  <Button
+                    onClick={handleSummarize}
+                    disabled={!inputText.trim() || isGenerating}
+                    className="mt-6 flex items-center gap-2"
+                  >
+                    {isGenerating ? (
+                      <>
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        กำลังสรุป...
+                      </>
+                    ) : (
+                      <>
+                        <Brain className="h-4 w-4" />
+                        สรุปด้วย AI
+                      </>
+                    )}
                   </Button>
                 </div>
               </CardContent>
             </Card>
+
+
+
+
+
+
+
+
+
 
             {/* Output Section */}
             <Card>
@@ -118,14 +208,25 @@ export default function SummarizePage() {
                     </div>
 
                     <div className="flex gap-2">
-                      <Button variant="outline" size="sm">
+                      {/* <Button variant="outline" size="sm">
                         <Copy className="h-4 w-4 mr-2" />
                         คัดลอก
+                      </Button> */}
+
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={handleCopy}
+                        className="flex items-center gap-1"
+                      >
+                        <Copy className="h-4 w-4" />
+                        {copied ? "คัดลอกแล้ว!" : "คัดลอก"}
                       </Button>
-                      <Button variant="outline" size="sm">
+
+                      {/* <Button variant="outline" size="sm">
                         <Download className="h-4 w-4 mr-2" />
                         ดาวน์โหลด
-                      </Button>
+                      </Button> */}
                     </div>
                   </>
                 ) : (
