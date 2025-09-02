@@ -54,6 +54,8 @@ import {
   Badge,
 } from "lucide-react"
 import { useRef, useState, useEffect } from "react"
+import { AppSidebar } from "@/components/app-sidebar"
+import { AppHeader } from "@/components/header-bar"
 
 interface ChatMessage {
   id: number
@@ -72,15 +74,37 @@ interface ChatSession {
   webhookUrl?: string
 }
 
-function ChatSidebar({ 
-  onSessionSelect, 
-  onNewChat, 
-  currentSessionId 
-}: { 
+function ChatSidebar({
+  onSessionSelect,
+  onNewChat,
+  currentSessionId
+}: {
   onSessionSelect: (sessionId: string) => void
   onNewChat: () => void
   currentSessionId?: string
 }) {
+  return (
+    <div className="w-full h-[calc(100dvh-65px)] overflow-hidden border-r border-[#dedede]">
+      <div className="flex flex-row items-center justify-between gap-2 px-2 py-4">
+        <div className="flex flex-row items-center gap-2 px-2">
+          <div className="bg-primary/10 size-8 rounded-md"></div>
+          <div className="text-md font-base text-primary tracking-tight">
+            AI Chat
+          </div>
+        </div>
+        <Button variant="ghost" className="size-8">
+          <History className="size-4" />
+        </Button>
+      </div>
+      <div className="overflow-x-auto h-[calc(100dvh-135px)] custom-scroll">
+        <ChatHistory
+          onSessionSelect={onSessionSelect}
+          onNewChat={onNewChat}
+          currentSessionId={currentSessionId}
+        />
+      </div>
+    </div>
+  )
   return (
     <Sidebar>
       <SidebarHeader className="flex flex-row items-center justify-between gap-2 px-2 py-4">
@@ -95,7 +119,7 @@ function ChatSidebar({
         </Button>
       </SidebarHeader>
       <SidebarContent className="pt-4">
-        <ChatHistory 
+        <ChatHistory
           onSessionSelect={onSessionSelect}
           onNewChat={onNewChat}
           currentSessionId={currentSessionId}
@@ -105,10 +129,10 @@ function ChatSidebar({
   )
 }
 
-function ChatContent({ 
+function ChatContent({
   currentSessionId,
-  onSessionUpdate 
-}: { 
+  onSessionUpdate
+}: {
   currentSessionId?: string
   onSessionUpdate: (session: ChatSession) => void
 }) {
@@ -117,7 +141,7 @@ function ChatContent({
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([])
   const [sessionTitle, setSessionTitle] = useState("New Chat")
   const chatContainerRef = useRef<HTMLDivElement>(null)
-//   const [inputValue, setInputValue] = useState("")
+  //   const [inputValue, setInputValue] = useState("")
   const handleSend = () => {
     if (prompt.trim()) {
       console.log("Sending:", prompt)
@@ -141,7 +165,7 @@ function ChatContent({
       setSessionTitle("New Chat")
     }
     startStreaming()
-  }, [currentSessionId,startStreaming])
+  }, [currentSessionId, startStreaming])
 
   const loadSession = async (sessionId: string) => {
     try {
@@ -161,7 +185,7 @@ function ChatContent({
   const generateSessionTitle = (messages: ChatMessage[]): string => {
     const firstUserMessage = messages.find(msg => msg.role === 'user')
     if (!firstUserMessage) return 'New Chat'
-    
+
     const content = firstUserMessage.content
     if (content.length <= 50) return content
     return content.substring(0, 50) + '...'
@@ -171,7 +195,7 @@ function ChatContent({
     try {
       // Generate title automatically if not provided
       const autoTitle = title || generateSessionTitle(messages)
-      
+
       const response = await fetch('/api/chat/history', {
         method: 'POST',
         headers: {
@@ -247,7 +271,7 @@ function ChatContent({
       const data = await response.json()
       console.log(data);
       console.log(JSON.parse(data.message));
-      
+
       const assistantResponse: ChatMessage = {
         id: updatedMessages.length + 1,
         role: "assistant",
@@ -263,10 +287,10 @@ function ChatContent({
 
     } catch (error) {
       console.error('Error calling AI API:', error)
-      
+
       // Add error message with more helpful information
       let errorContent = "Sorry, I encountered an error. "
-      
+
       if (error instanceof Error) {
         if (error.message.includes('webhook') && error.message.includes('not registered')) {
           errorContent += "The webhook is not registered "
@@ -278,17 +302,17 @@ function ChatContent({
       } else {
         errorContent += "Please make sure n8n is running and the webhook is configured correctly."
       }
-      
+
       const errorMessage: ChatMessage = {
         id: updatedMessages.length + 1,
         role: "assistant",
         content: errorContent,
         timestamp: new Date().toISOString()
       }
-      
+
       const finalMessages = [...updatedMessages, errorMessage]
       setChatMessages(finalMessages)
-      
+
       // Save session after error message
       await saveSession(finalMessages)
     } finally {
@@ -299,7 +323,7 @@ function ChatContent({
   const handleNewChat = async () => {
     // Save current session before starting new chat
     await saveCurrentSession()
-    
+
     // Reset for new chat
     setChatMessages([])
     setSessionTitle("New Chat")
@@ -316,7 +340,7 @@ function ChatContent({
   const handleSessionSelect = async (sessionId: string) => {
     // Save current session before switching
     await saveCurrentSession()
-    
+
     // Load selected session
     window.history.replaceState(null, '', `/chat?session=${sessionId}`)
     onSessionUpdate({
@@ -333,14 +357,13 @@ function ChatContent({
   }
 
   return (
-    <main className="flex h-screen flex-col overflow-hidden">
+    <main className="flex h-[calc(100dvh-70px)] flex-col overflow-hidden">
       <header className="bg-background z-10 flex h-16 w-full shrink-0 items-center gap-4 border-b px-4">
-        <SidebarTrigger className="-ml-1" />
         <div className="text-foreground flex items-center gap-2">
           <span>{sessionTitle}</span>
           {currentSessionId && (
-            <Badge className="text-xs bg-secondary text-secondary-foreground">
-              {chatMessages.length} messages
+            <Badge className="text-xs bg-blue-500 rounded-xl text-secondary-foreground">
+              {chatMessages?.length} messages
             </Badge>
           )}
         </div>
@@ -366,32 +389,32 @@ function ChatContent({
                 <MessageSquare className="h-12 w-12 mx-auto mb-4 opacity-50" />
                 <h3 className="text-lg font-medium mb-2">Start a new conversation</h3>
                 <p className="text-sm">Type a message below to begin chatting with AI</p>
-                    <div className="flex w-full flex-col space-y-4">
-                        <div className="flex flex-wrap gap-2 w-[500px] items-center">
-                            <PromptSuggestion onClick={() => setPrompt("Tell me a joke")}>
-                                ขอเรียกความสนใจ
-                                </PromptSuggestion>
+                <div className="flex w-full flex-col space-y-4 items-center pt-5">
+                  <div className="flex flex-wrap gap-2 w-[500px] items-center justify-center">
+                    <PromptSuggestion onClick={() => setPrompt("Tell me a joke")}>
+                      ขอเรียกความสนใจ
+                    </PromptSuggestion>
 
-                                <PromptSuggestion onClick={() => setPrompt("How does this work?")}>
-                                สวัสดีครับ
-                                </PromptSuggestion>
+                    <PromptSuggestion onClick={() => setPrompt("How does this work?")}>
+                      สวัสดีครับ
+                    </PromptSuggestion>
 
-                                <PromptSuggestion
-                                onClick={() => setPrompt("สรุปคำพิพากษา คดีพิพาทหมายเลข ๓๔๔/๒๕๖ มาให้หน่อยแบบละเอียด")}
-                                >
-                                สรุปคำพิพากษา คดีพิพาทหมายเลข ๓๔๔/๒๕๖ มาให้หน่อยแบบละเอียด
-                                </PromptSuggestion>
+                    <PromptSuggestion
+                      onClick={() => setPrompt("สรุปคำพิพากษา คดีพิพาทหมายเลข ๓๔๔/๒๕๖ มาให้หน่อยแบบละเอียด")}
+                    >
+                      สรุปคำพิพากษา คดีพิพาทหมายเลข ๓๔๔/๒๕๖ มาให้หน่อยแบบละเอียด
+                    </PromptSuggestion>
 
-                                <PromptSuggestion onClick={() => setPrompt("Write a poem")}>
-                                Write a poem
-                                </PromptSuggestion>
-                                <PromptSuggestion
-                                onClick={() => setPrompt("Code a React component")}
-                                >
-                                Code a React component
-                            </PromptSuggestion>
-                        </div>
-                    </div>
+                    <PromptSuggestion onClick={() => setPrompt("Write a poem")}>
+                      Write a poem
+                    </PromptSuggestion>
+                    <PromptSuggestion
+                      onClick={() => setPrompt("Code a React component")}
+                    >
+                      Code a React component
+                    </PromptSuggestion>
+                  </div>
+                </div>
               </div>
             ) : (
               chatMessages.map((message, index) => {
@@ -509,16 +532,16 @@ function ChatContent({
         </ChatContainerRoot>
       </div>
 
-        <div className="bg-background z-10 shrink-0 px-3 pb-3 md:px-5 md:pb-5">
-            <div className="mx-auto max-w-3xl">
-            
-                
+      <div className="bg-background z-10 shrink-0 px-3 pb-3 md:px-5 md:pb-5">
+        <div className="mx-auto max-w-3xl">
+
+
           <PromptInput
             isLoading={isLoading}
             value={prompt}
             onValueChange={setPrompt}
             onSubmit={handleSubmit}
-            className="border-input bg-popover relative z-10 w-full rounded-3xl border-2 p-0 pt-1 shadow-xs"
+            className="bg-popover relative z-10 w-full rounded-3xl border border-gray-200 p-0 pt-1 shadow-xs"
           >
             <div className="flex flex-col">
               <PromptInputTextarea
@@ -603,7 +626,43 @@ export default function ChatPage() {
 
   return (
     <SidebarProvider>
-      <ChatSidebar 
+      <AppSidebar />
+      <SidebarInset>
+        <AppHeader title={'แชท AI'} />
+        <div className="grid grid-cols-[300px_calc(100vw-560px)] overflow-hidden">
+          <ChatSidebar
+            onSessionSelect={(sessionId) => {
+              setCurrentSession({
+                id: sessionId,
+                title: "",
+                messages: [],
+                createdAt: "",
+                updatedAt: ""
+              })
+            }}
+            onNewChat={() => {
+              setCurrentSession({
+                id: '',
+                title: "New Chat",
+                messages: [],
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString()
+              })
+            }}
+            currentSessionId={currentSession.id}
+          />
+          <ChatContent
+            currentSessionId={currentSession.id}
+            onSessionUpdate={handleSessionUpdate}
+          />
+        </div>
+      </SidebarInset>
+    </SidebarProvider>
+  )
+
+  return (
+    <SidebarProvider>
+      <ChatSidebar
         onSessionSelect={(sessionId) => {
           setCurrentSession({
             id: sessionId,
@@ -625,7 +684,7 @@ export default function ChatPage() {
         currentSessionId={currentSession.id}
       />
       <SidebarInset>
-        <ChatContent 
+        <ChatContent
           currentSessionId={currentSession.id}
           onSessionUpdate={handleSessionUpdate}
         />

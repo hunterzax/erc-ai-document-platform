@@ -78,12 +78,12 @@ export function ChatHistory({ onSessionSelect, onNewChat, currentSessionId, refr
 
   const deleteSession = async (sessionId: string) => {
     if (!confirm('Are you sure you want to delete this chat session?')) return
-    
+
     try {
       const response = await fetch(`/api/chat/history?sessionId=${sessionId}`, {
         method: 'DELETE'
       })
-      
+
       if (response.ok) {
         setSessions(prev => prev.filter(s => s.id !== sessionId))
       }
@@ -96,7 +96,7 @@ export function ChatHistory({ onSessionSelect, onNewChat, currentSessionId, refr
     try {
       const session = sessions.find(s => s.id === sessionId)
       if (!session) return
-      
+
       const response = await fetch('/api/chat/history', {
         method: 'POST',
         headers: {
@@ -108,9 +108,9 @@ export function ChatHistory({ onSessionSelect, onNewChat, currentSessionId, refr
           messages: [] // We'll update this when we have the actual messages
         })
       })
-      
+
       if (response.ok) {
-        setSessions(prev => prev.map(s => 
+        setSessions(prev => prev.map(s =>
           s.id === sessionId ? { ...s, title: newTitle } : s
         ))
         setEditingTitle(null)
@@ -157,13 +157,13 @@ export function ChatHistory({ onSessionSelect, onNewChat, currentSessionId, refr
   return (
     <div className="flex flex-col h-full">
       {/* Header */}
-      <div className="p-4 border-b">
+      <div className="p-3 border-b">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-semibold">Chat History</h2>
           <div className="flex items-center gap-2">
-            <Button 
-              onClick={loadChatHistory} 
-              size="sm" 
+            <Button
+              onClick={loadChatHistory}
+              size="sm"
               variant="ghost"
               className="h-8 w-8 p-0"
               disabled={loading}
@@ -176,7 +176,7 @@ export function ChatHistory({ onSessionSelect, onNewChat, currentSessionId, refr
             </Button>
           </div>
         </div>
-        
+
         {/* Search */}
         <div className="relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -184,7 +184,7 @@ export function ChatHistory({ onSessionSelect, onNewChat, currentSessionId, refr
             placeholder="Search chats..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10"
+            className="pl-10 border border-[#dedede]"
           />
         </div>
       </div>
@@ -204,11 +204,10 @@ export function ChatHistory({ onSessionSelect, onNewChat, currentSessionId, refr
             {filteredSessions.map((session) => (
               <div
                 key={session.id}
-                className={`group relative p-3 rounded-lg border cursor-pointer transition-colors ${
-                  currentSessionId === session.id
-                    ? 'bg-primary/10 border-primary'
-                    : 'hover:bg-muted/50 border-border'
-                }`}
+                className={`group relative p-3 rounded-lg border cursor-pointer transition-colors ${currentSessionId === session.id
+                  ? 'bg-primary/10 border-primary'
+                  : 'hover:bg-muted/50 border-border'
+                  }`}
                 onClick={() => onSessionSelect(session.id)}
               >
                 {/* Title */}
@@ -233,42 +232,44 @@ export function ChatHistory({ onSessionSelect, onNewChat, currentSessionId, refr
                       </Button>
                     </div>
                   ) : (
-                    <h3 className="font-medium text-sm flex-1 pr-2">
-                      {truncateText(session.title, 40)}
-                    </h3>
+                    <div className='flex justify-between w-full'>
+                      <h3 className="font-medium text-sm">
+                        {truncateText(session.title, 25)}
+                      </h3>
+                      {/* Actions */}
+                      <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            startEditing(session)
+                          }}
+                          className="h-6 w-6 p-0"
+                        >
+                          <Edit3 className="h-3 w-3" />
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            deleteSession(session.id)
+                          }}
+                          className="h-6 w-6 p-0 text-destructive hover:text-destructive"
+                        >
+                          <Trash2 className="h-3 w-3" />
+                        </Button>
+                      </div>
+                    </div>
                   )}
-                  
-                  {/* Actions */}
-                  <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        startEditing(session)
-                      }}
-                      className="h-6 w-6 p-0"
-                    >
-                      <Edit3 className="h-3 w-3" />
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        deleteSession(session.id)
-                      }}
-                      className="h-6 w-6 p-0 text-destructive hover:text-destructive"
-                    >
-                      <Trash2 className="h-3 w-3" />
-                    </Button>
-                  </div>
+
                 </div>
 
                 {/* Last Message */}
                 {session.lastMessage && (
                   <p className="text-xs text-muted-foreground mb-2 line-clamp-2">
-                    {truncateText(session.lastMessage, 60)}
+                    {truncateText(session.lastMessage, 80)}
                   </p>
                 )}
 
@@ -285,10 +286,10 @@ export function ChatHistory({ onSessionSelect, onNewChat, currentSessionId, refr
                 </div>
 
                 {/* Created Date */}
-                <div className="absolute top-2 right-2 text-xs text-muted-foreground">
+                {/* <div className="absolute bottom-2 right-2 text-xs text-muted-foreground">
                   <Calendar className="h-3 w-3 inline mr-1" />
                   {formatDate(session.createdAt)}
-                </div>
+                </div> */}
               </div>
             ))}
           </div>

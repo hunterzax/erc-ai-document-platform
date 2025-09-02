@@ -29,6 +29,8 @@ import {
   SidebarRail,
 } from "@/components/ui/sidebar"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { NavLink } from 'react-router-dom';
+import { useEffect, useState } from "react"
 
 // Navigation items for the AI Document Intelligence Platform
 const data = {
@@ -77,25 +79,49 @@ const data = {
 }
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+
+  const [currentPath, setCurrentPath] = useState<string>('');
+
+  useEffect(() => {
+    setCurrentPath(window.location.pathname);  // ตั้งค่า path ปัจจุบันเมื่อโหลดคอมโพเนนต์
+  }, []);
+
   return (
     <Sidebar collapsible="icon" {...props}>
-      <SidebarHeader>
+      {/* <div className="w-64 bg-sidebar border-r border-border flex flex-col">
+        <div className="p-4 border-b border-border">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 bg-sidebar-primary rounded-lg flex items-center justify-center">
+              <FileText className="w-4 h-4 text-sidebar-primary-foreground" />
+            </div>
+            <div className="flex flex-col">
+              <span className="font-semibold text-sm">AI Document</span>
+              <span className="text-xs text-muted-foreground">Intelligence Platform</span>
+            </div>
+          </div>
+        </div>
+      </div> */}
+      <SidebarHeader className="border-b border-border">
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton size="lg" asChild>
-              <a href="/">
-                <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
-                  <FileText className="size-4" />
+            <SidebarMenuButton size="lg" asChild className="hover:!bg-transparent !text-black">
+              <div className="p-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 bg-sidebar-primary rounded-lg flex items-center justify-center">
+                    <FileText className="w-4 h-4 text-sidebar-primary-foreground" />
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="font-semibold text-sm">AI Document</span>
+                    <span className="text-xs text-muted-foreground">Intelligence Platform</span>
+                  </div>
                 </div>
-                <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-semibold">AI Document</span>
-                  <span className="truncate text-xs">Intelligence Platform</span>
-                </div>
-              </a>
+              </div>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
+
+
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupLabel>เมนูหลัก</SidebarGroupLabel>
@@ -104,7 +130,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               {data.navMain.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
-                    <a href={item.url}>
+                    <a href={item.url} className={`${currentPath == item?.url ? '!bg-blue-500 text-white' : 'bg-transparent hover:!bg-gray-200 !text-black'} px-3 py-2`}>
                       <item.icon />
                       <span>{item.title}</span>
                     </a>
@@ -149,7 +175,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarFooter>
-      <SidebarRail />
     </Sidebar>
   )
 }
