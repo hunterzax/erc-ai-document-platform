@@ -26,6 +26,7 @@ import { useToast } from "@/hooks/use-toast"
 import { AppHeader } from "@/components/header-bar"
 import PdfViewer from "@/components/ui/pdfviewer"
 import axios from "axios"
+import { AIConfigModal } from "@/components/byk/ai_setting_btn"
 interface ImageItem {
   source: string;
   typhoon_ocr: string;
@@ -559,10 +560,10 @@ export default function UploadPage() {
                 <CardTitle>อัปโหลดเอกสาร</CardTitle>
                 <CardDescription>รองรับไฟล์ PDF, Word, และรูปภาพ</CardDescription>
               </CardHeader>
-              <CardContent className="flex-1 flex flex-col">
+              <CardContent className="grid grid-cols-3 gap-5">
                 <div
                   {...getRootProps()}
-                  className={`border border-dashed rounded-lg p-6 text-center cursor-pointer transition-colors flex-1 flex flex-col items-center justify-center hover:bg-blue-200/30 ${isDragActive ? "border-primary bg-primary/5" : "border-muted-foreground/25 hover:border-primary/50"
+                  className={`col-span-2 border border-dashed rounded-lg p-6 text-center cursor-pointer transition-colors flex-1 flex flex-col items-center justify-center hover:bg-blue-200/30 ${isDragActive ? "border-primary bg-primary/5" : "border-muted-foreground/25 hover:border-primary/50"
                     }`}
                 >
                   <input {...getInputProps()} />
@@ -592,6 +593,9 @@ export default function UploadPage() {
                       ))}
                     </div>
                   )}
+                </div>
+                <div>
+                  <AIConfigModal mode='form'/>
                 </div>
               </CardContent>
             </Card>

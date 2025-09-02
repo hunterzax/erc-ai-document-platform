@@ -473,7 +473,7 @@ export default function UsersPage() {
                       <TableHead>สถานะ</TableHead>
                       <TableHead>เข้าสู่ระบบล่าสุด</TableHead>
                       <TableHead className="text-center">จำนวนครั้ง</TableHead>
-                      <TableHead className="text-right">การดำเนินการ</TableHead>
+                      <TableHead className="text-center w-[130px]">การดำเนินการ</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -498,7 +498,7 @@ export default function UsersPage() {
                         </TableCell>
                         <TableCell className="text-sm">{user.lastLogin}</TableCell>
                         <TableCell className="text-center">{user.loginCount}</TableCell>
-                        <TableCell className="text-right">
+                        <TableCell className="text-center">
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                               <Button variant="ghost" className="h-8 w-8 p-0">
