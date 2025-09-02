@@ -139,7 +139,7 @@ export default function SearchPage() {
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
                       onKeyPress={handleKeyPress}
-                      className="pl-10"
+                      className="pl-10 border border-[#dedede] placeholder:opacity-40 text-sm"
                     />
                   </div>
                   <Button onClick={handleSearch} disabled={isSearching}>
@@ -152,7 +152,7 @@ export default function SearchPage() {
                   <div>
                     <label className="text-sm font-medium mb-2 block">ประเภทเอกสาร</label>
                     <Select value={documentType} onValueChange={setDocumentType}>
-                      <SelectTrigger>
+                      <SelectTrigger className="w-full border border-[#dedede]">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -168,7 +168,7 @@ export default function SearchPage() {
                   <div>
                     <label className="text-sm font-medium mb-2 block">ปี พ.ศ.</label>
                     <Select value={documentYear} onValueChange={setDocumentYear}>
-                      <SelectTrigger>
+                      <SelectTrigger className="w-full border border-[#dedede]">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -185,7 +185,7 @@ export default function SearchPage() {
                   <div>
                     <label className="text-sm font-medium mb-2 block">หมวดหมู่</label>
                     <Select value={documentCategory} onValueChange={setDocumentCategory}>
-                      <SelectTrigger>
+                      <SelectTrigger className="w-full border border-[#dedede]">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>

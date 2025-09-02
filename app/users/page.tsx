@@ -375,7 +375,7 @@ export default function UsersPage() {
                           value={newUser.name}
                           onChange={(e) => setNewUser({ ...newUser, name: e.target.value })}
                           placeholder="นายสมชาย ใจดี"
-                          className="w-full bg-white rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                          className="w-full border border-[#dedede] placeholder:opacity-40"
                         />
                       </div>
                       <div className="grid gap-2">
@@ -386,16 +386,16 @@ export default function UsersPage() {
                           value={newUser.email}
                           onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
                           placeholder="somchai@ggp.go.th"
-                          className="w-full bg-white rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                          className="w-full border border-[#dedede] placeholder:opacity-40"
                         />
                       </div>
                       <div className="grid gap-2">
                         <Label htmlFor="role">บทบาท</Label>
                         <Select
-                          value={newUser.role}
+                          value={newUser?.role}
                           onValueChange={(value: any) => setNewUser({ ...newUser, role: value })}
                         >
-                          <SelectTrigger className="w-full bg-white rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                          <SelectTrigger className="w-full border border-[#dedede] placeholder:opacity-40">
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent className="rounded-lg shadow-md">
@@ -412,12 +412,12 @@ export default function UsersPage() {
                           value={newUser.department}
                           onChange={(e) => setNewUser({ ...newUser, department: e.target.value })}
                           placeholder="สำนักงานเลขาธิการ"
-                          className="w-full bg-white rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                          className="w-full border border-[#dedede] placeholder:opacity-40"
                         />
                       </div>
                     </div>
                     <DialogFooter>
-                      <Button variant="outline" onClick={() => setIsAddUserOpen(false)}>
+                      <Button variant="outline" className="hover:bg-transparent hover:text-black" onClick={() => setIsAddUserOpen(false)}>
                         ยกเลิก
                       </Button>
                       <Button onClick={handleAddUser}>เพิ่มผู้ใช้</Button>
@@ -435,14 +435,11 @@ export default function UsersPage() {
                     placeholder="ค้นหาผู้ใช้..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    // className="pl-10"
-                    className="w-full bg-white pl-10 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-
+                    className="pl-10 border border-[#dedede] placeholder:opacity-40"
                   />
                 </div>
                 <Select value={roleFilter} onValueChange={setRoleFilter}>
-                  {/* <SelectTrigger className="w-40"> */}
-                  <SelectTrigger className="w-40 bg-white rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                  <SelectTrigger className="w-40 border border-[#dedede]">
                     <SelectValue placeholder="บทบาท" />
                   </SelectTrigger>
                   <SelectContent className="rounded-lg shadow-md">
@@ -453,8 +450,7 @@ export default function UsersPage() {
                   </SelectContent>
                 </Select>
                 <Select value={statusFilter} onValueChange={setStatusFilter}>
-                  {/* <SelectTrigger className="w-40"> */}
-                  <SelectTrigger className="w-40 bg-white rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                  <SelectTrigger className="w-40 border border-[#dedede]">
                     <SelectValue placeholder="สถานะ" />
                   </SelectTrigger>
                   <SelectContent className="rounded-lg shadow-md">
@@ -476,7 +472,7 @@ export default function UsersPage() {
                       <TableHead>หน่วยงาน</TableHead>
                       <TableHead>สถานะ</TableHead>
                       <TableHead>เข้าสู่ระบบล่าสุด</TableHead>
-                      <TableHead>จำนวนครั้งที่เข้าสู่ระบบ</TableHead>
+                      <TableHead className="text-center">จำนวนครั้ง</TableHead>
                       <TableHead className="text-right">การดำเนินการ</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -489,9 +485,17 @@ export default function UsersPage() {
                             <div className="text-sm text-muted-foreground">{user.email}</div>
                           </div>
                         </TableCell>
-                        <TableCell>{getRoleBadge(user.role)}</TableCell>
+                        <TableCell>
+                          <div className="flex justify-center items-center h-full">
+                            {getRoleBadge(user.role)}
+                          </div>
+                        </TableCell>
                         <TableCell>{user.department}</TableCell>
-                        <TableCell>{getStatusBadge(user.status)}</TableCell>
+                        <TableCell>
+                          <div className="flex justify-center items-center h-full">
+                            {getStatusBadge(user.status)}
+                          </div>
+                        </TableCell>
                         <TableCell className="text-sm">{user.lastLogin}</TableCell>
                         <TableCell className="text-center">{user.loginCount}</TableCell>
                         <TableCell className="text-right">
@@ -549,6 +553,7 @@ export default function UsersPage() {
                       id="edit-name"
                       value={selectedUser.name}
                       onChange={(e) => setSelectedUser({ ...selectedUser, name: e.target.value })}
+                      className="w-full border border-[#dedede]"
                     />
                   </div>
                   <div className="grid gap-2">
@@ -558,6 +563,7 @@ export default function UsersPage() {
                       type="email"
                       value={selectedUser.email}
                       onChange={(e) => setSelectedUser({ ...selectedUser, email: e.target.value })}
+                      className="w-full border border-[#dedede]"
                     />
                   </div>
                   <div className="grid gap-2">
@@ -566,7 +572,7 @@ export default function UsersPage() {
                       value={selectedUser.role}
                       onValueChange={(value: any) => setSelectedUser({ ...selectedUser, role: value })}
                     >
-                      <SelectTrigger>
+                      <SelectTrigger className="w-full border border-[#dedede]">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -582,12 +588,13 @@ export default function UsersPage() {
                       id="edit-department"
                       value={selectedUser.department}
                       onChange={(e) => setSelectedUser({ ...selectedUser, department: e.target.value })}
+                      className="w-full border border-[#dedede]"
                     />
                   </div>
                 </div>
               )}
               <DialogFooter>
-                <Button variant="outline" onClick={() => setIsEditUserOpen(false)}>
+                <Button variant="outline" className="hover:bg-transparent hover:text-black" onClick={() => setIsEditUserOpen(false)}>
                   ยกเลิก
                 </Button>
                 <Button onClick={handleUpdateUser}>บันทึก</Button>
