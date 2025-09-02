@@ -22,11 +22,8 @@ import { Input } from "@/components/ui/input"
 import { Upload, FileText, ImageIcon, X, CheckCircle, AlertCircle, Clock, Download, Copy, Search, Table, FormInput, Eye, FileDigit, Settings } from "lucide-react"
 import { useState, useCallback, useEffect } from "react"
 import { useDropzone } from "react-dropzone"
-<<<<<<< HEAD
-import { AppHeader } from "@/components/header-bar"
-=======
 import { useToast } from "@/hooks/use-toast"
->>>>>>> main
+import { AppHeader } from "@/components/header-bar"
 
 interface UploadedFile {
   id: string
@@ -324,7 +321,7 @@ export default function UploadPage() {
       <SidebarInset>
         <AppHeader title={'อัปโหลดเอกสาร'}/>
 
-        <div className="flex flex-1 flex-col gap-6 p-4 pt-0">
+        <div className="flex flex-1 flex-col gap-6 p-4">
           {/* 2x2 Grid Layout */}
           <div className="grid grid-cols-2 gap-6 h-[600px]">
             
