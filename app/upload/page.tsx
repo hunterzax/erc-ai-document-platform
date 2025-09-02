@@ -18,10 +18,15 @@ import { Progress } from "@/components/ui/progress"
 import { Badge } from "@/components/ui/badge"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
-import { Upload, FileText, ImageIcon, X, CheckCircle, AlertCircle, Clock } from "lucide-react"
-import { useState, useCallback } from "react"
+import { Input } from "@/components/ui/input"
+import { Upload, FileText, ImageIcon, X, CheckCircle, AlertCircle, Clock, Download, Copy, Search, Table, FormInput, Eye, FileDigit, Settings } from "lucide-react"
+import { useState, useCallback, useEffect } from "react"
 import { useDropzone } from "react-dropzone"
+<<<<<<< HEAD
 import { AppHeader } from "@/components/header-bar"
+=======
+import { useToast } from "@/hooks/use-toast"
+>>>>>>> main
 
 interface UploadedFile {
   id: string
@@ -32,6 +37,24 @@ interface UploadedFile {
   progress: number
   ocrAccuracy?: number
   extractedText?: string
+  fileUrl?: string
+  ocrResult?: any
+  extractionResults?: any
+  dimensions?: {
+    width: number
+    height: number
+    aspectRatio: number
+  }
+}
+
+interface ExtractionParams {
+  model: string
+  task_type: string
+  max_tokens: number
+  temperature: number
+  top_p: number
+  repetition_penalty: number
+  pages: (number | null)[]
 }
 
 export default function UploadPage() {
@@ -40,8 +63,22 @@ export default function UploadPage() {
   const [documentYear, setDocumentYear] = useState("")
   const [documentCategory, setDocumentCategory] = useState("")
   const [description, setDescription] = useState("")
+  const [selectedFile, setSelectedFile] = useState<UploadedFile | null>(null)
+  const [extractionType, setExtractionType] = useState("all")
+  const [isExtracting, setIsExtracting] = useState(false)
+  const [showAdvancedParams, setShowAdvancedParams] = useState(false)
+  const [extractionParams, setExtractionParams] = useState<ExtractionParams>({
+    model: "typhoon-ocr-preview",
+    task_type: "default",
+    max_tokens: 16000,
+    temperature: 0.1,
+    top_p: 0.6,
+    repetition_penalty: 1.2,
+    pages: []
+  })
+  const { toast } = useToast()
 
-  const onDrop = useCallback((acceptedFiles: File[]) => {
+  const onDrop = useCallback(async (acceptedFiles: File[]) => {
     const newFiles: UploadedFile[] = acceptedFiles.map((file) => ({
       id: Math.random().toString(36).substr(2, 9),
       name: file.name,
@@ -53,63 +90,174 @@ export default function UploadPage() {
 
     setFiles((prev) => [...prev, ...newFiles])
 
-    // Simulate upload and processing
-    newFiles.forEach((file) => {
-      simulateFileProcessing(file.id)
-    })
+    // Process each file
+    for (const file of newFiles) {
+      await processFile(file, acceptedFiles.find(f => f.name === file.name)!)
+    }
   }, [])
 
-  const simulateFileProcessing = (fileId: string) => {
-    // Simulate upload progress
-    const uploadInterval = setInterval(() => {
+  const processFile = async (file: UploadedFile, originalFile: File) => {
+    try {
+      // Create FormData for upload
+      const formData = new FormData()
+      formData.append('file', originalFile)
+
+      // Upload to our API
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      })
+
+      if (!response.ok) {
+        throw new Error('Upload failed')
+      }
+
+      const result = await response.json()
+      
+              // Get image dimensions if it's an image file
+        let dimensions: {width: number, height: number, aspectRatio: number} | undefined
+        if (originalFile.type.startsWith('image/')) {
+          dimensions = await getImageDimensions(originalFile)
+        }
+      
+      // Update file status to completed
       setFiles((prev) =>
-        prev.map((file) => {
-          if (file.id === fileId && file.status === "uploading") {
-            const newProgress = Math.min(file.progress + Math.random() * 20, 100)
-            if (newProgress >= 100) {
-              clearInterval(uploadInterval)
-              // Start OCR processing
-              setTimeout(() => {
-                setFiles((prev) => prev.map((f) => (f.id === fileId ? { ...f, status: "processing", progress: 0 } : f)))
-                simulateOCRProcessing(fileId)
-              }, 500)
-              return { ...file, progress: 100, status: "processing" }
-            }
-            return { ...file, progress: newProgress }
-          }
-          return file
-        }),
+        prev.map((f) =>
+          f.id === file.id
+            ? {
+                ...f,
+                status: "completed",
+                progress: 100,
+                ocrResult: result.data.ocrResult,
+                extractedText: result.data.ocrResult?.text || 'ไม่สามารถแยกข้อความได้',
+                fileUrl: URL.createObjectURL(originalFile),
+                dimensions: dimensions
+              }
+            : f
+        )
       )
-    }, 200)
+
+      toast({
+        title: "อัพโหลดสำเร็จ",
+        description: `ไฟล์ ${file.name} ถูกอัพโหลดและประมวลผล OCR เรียบร้อยแล้ว`,
+      })
+
+    } catch (error) {
+      console.error('Error processing file:', error)
+      setFiles((prev) =>
+        prev.map((f) =>
+          f.id === file.id
+            ? { ...f, status: "error", progress: 0 }
+            : f
+        )
+      )
+
+      toast({
+        title: "เกิดข้อผิดพลาด",
+        description: `ไม่สามารถประมวลผลไฟล์ ${file.name} ได้`,
+        variant: "destructive",
+      })
+    }
   }
 
-  const simulateOCRProcessing = (fileId: string) => {
-    const ocrInterval = setInterval(() => {
+  // ฟังก์ชันหาขนาดภาพบน client-side
+  const getImageDimensions = (file: File): Promise<{width: number, height: number, aspectRatio: number}> => {
+    return new Promise((resolve) => {
+      const img = new Image()
+      img.onload = () => {
+        const dimensions = {
+          width: img.width,
+          height: img.height,
+          aspectRatio: img.width / img.height
+        }
+        resolve(dimensions)
+      }
+      img.onerror = () => {
+        resolve({ width: 0, height: 0, aspectRatio: 0 })
+      }
+      img.src = URL.createObjectURL(file)
+    })
+  }
+
+  const extractAdvancedData = async (file: UploadedFile) => {
+    if (!file.fileUrl) return
+
+    setIsExtracting(true)
+    try {
+      // Convert fileUrl back to File object
+      const response = await fetch(file.fileUrl)
+      const blob = await response.blob()
+      const fileObj = new File([blob], file.name, { type: file.type })
+
+      const formData = new FormData()
+      formData.append('file', fileObj)
+      formData.append('type', extractionType)
+      
+      // เพิ่ม parameters สำหรับการสกัดข้อมูล
+      if (showAdvancedParams) {
+        formData.append('params', JSON.stringify(extractionParams))
+      }
+
+      const extractResponse = await fetch('/api/extract', {
+        method: 'POST',
+        body: formData,
+      })
+
+      if (!extractResponse.ok) {
+        throw new Error('Extraction failed')
+      }
+
+      const result = await extractResponse.json()
+      
+      // Update file with extraction results
       setFiles((prev) =>
-        prev.map((file) => {
-          if (file.id === fileId && file.status === "processing") {
-            const newProgress = Math.min(file.progress + Math.random() * 15, 100)
-            if (newProgress >= 100) {
-              clearInterval(ocrInterval)
-              const accuracy = Math.floor(Math.random() * 10) + 90 // 90-99%
-              return {
-                ...file,
-                progress: 100,
-                status: "completed",
-                ocrAccuracy: accuracy,
-                extractedText: `ข้อความที่แยกได้จาก ${file.name} (ความแม่นยำ ${accuracy}%)`,
-              }
-            }
-            return { ...file, progress: newProgress }
-          }
-          return file
-        }),
+        prev.map((f) =>
+          f.id === file.id
+            ? { ...f, extractionResults: result.data.results }
+            : f
+        )
       )
-    }, 300)
+
+      setSelectedFile(prev => prev ? { ...prev, extractionResults: result.data.results } : null)
+
+      toast({
+        title: "การสกัดข้อมูลสำเร็จ",
+        description: `สกัดข้อมูลจาก ${file.name} เรียบร้อยแล้ว`,
+      })
+
+    } catch (error) {
+      console.error('Extraction error:', error)
+      toast({
+        title: "เกิดข้อผิดพลาด",
+        description: `ไม่สามารถสกัดข้อมูลจาก ${file.name} ได้`,
+        variant: "destructive",
+      })
+    } finally {
+      setIsExtracting(false)
+    }
   }
 
   const removeFile = (fileId: string) => {
     setFiles((prev) => prev.filter((file) => file.id !== fileId))
+    if (selectedFile?.id === fileId) {
+      setSelectedFile(null)
+    }
+  }
+
+  const copyToClipboard = async (text: string) => {
+    try {
+      await navigator.clipboard.writeText(text)
+      toast({
+        title: "คัดลอกแล้ว",
+        description: "ข้อความถูกคัดลอกไปยังคลิปบอร์ดแล้ว",
+      })
+    } catch (error) {
+      toast({
+        title: "เกิดข้อผิดพลาด",
+        description: "ไม่สามารถคัดลอกข้อความได้",
+        variant: "destructive",
+      })
+    }
   }
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
@@ -160,23 +308,36 @@ export default function UploadPage() {
     }
   }
 
+  const getFileIcon = (fileType: string) => {
+    if (fileType.startsWith("image/")) {
+      return <ImageIcon className="h-4 w-4 text-blue-500" />
+    } else if (fileType === "application/pdf") {
+      return <FileDigit className="h-4 w-4 text-red-500" />
+    } else {
+      return <FileText className="h-4 w-4 text-blue-500" />
+    }
+  }
+
   return (
     <SidebarProvider>
       <AppSidebar />
       <SidebarInset>
         <AppHeader title={'อัปโหลดเอกสาร'}/>
-        <div className="flex flex-1 flex-col gap-6 p-4">
-          <div className="grid gap-6 lg:grid-cols-2">
-            {/* Upload Area */}
-            <Card>
+
+        <div className="flex flex-1 flex-col gap-6 p-4 pt-0">
+          {/* 2x2 Grid Layout */}
+          <div className="grid grid-cols-2 gap-6 h-[600px]">
+            
+            {/* Top-Left: Drop files here + Progress */}
+            <Card className="flex flex-col">
               <CardHeader>
                 <CardTitle>อัปโหลดเอกสาร</CardTitle>
-                <CardDescription>รองรับไฟล์ PDF, Word, และรูปภาพ (PNG, JPG, TIFF)</CardDescription>
+                <CardDescription>รองรับไฟล์ PDF, Word, และรูปภาพ</CardDescription>
               </CardHeader>
-              <CardContent>
+              <CardContent className="flex-1 flex flex-col">
                 <div
                   {...getRootProps()}
-                  className={`border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors ${
+                  className={`border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-colors flex-1 flex flex-col justify-center ${
                     isDragActive ? "border-primary bg-primary/5" : "border-muted-foreground/25 hover:border-primary/50"
                   }`}
                 >
@@ -191,17 +352,33 @@ export default function UploadPage() {
                       <Button variant="outline">เลือกไฟล์</Button>
                     </>
                   )}
+                  
+                  {/* Progress Bar Inside Drop Zone */}
+                  {files.length > 0 && (
+                    <div className="mt-6 w-full">
+                      <Label className="text-sm font-medium mb-2 block">Progress Upload</Label>
+                      {files.map((file) => (
+                        <div key={file.id} className="mb-3">
+                          <div className="flex items-center justify-between text-xs mb-1">
+                            <span className="truncate">{file.name}</span>
+                            <span className="text-muted-foreground">{file.progress}%</span>
+                          </div>
+                          <Progress value={file.progress} className="h-2" />
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>
 
-            {/* Metadata Form */}
-            <Card>
+            {/* Top-Right: Document Detail */}
+            <Card className="flex flex-col">
               <CardHeader>
-                <CardTitle>ข้อมูลเอกสาร</CardTitle>
-                <CardDescription>กรอกข้อมูลเพิ่มเติมเพื่อช่วยในการจัดหมวดหมู่</CardDescription>
+                <CardTitle>Document Detail</CardTitle>
+                <CardDescription>ข้อมูลเอกสาร</CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="flex-1 space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="document-type">ประเภทเอกสาร</Label>
                   <Select value={documentType} onValueChange={setDocumentType}>
@@ -257,68 +434,348 @@ export default function UploadPage() {
                     placeholder="เพิ่มคำอธิบายเกี่ยวกับเอกสาร..."
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
+                    className="flex-1"
                   />
                 </div>
               </CardContent>
             </Card>
-          </div>
 
-          {/* Uploaded Files List */}
-          {files.length > 0 && (
-            <Card>
+            {/* Bottom-Left: Picture Display */}
+            <Card className="flex flex-col">
               <CardHeader>
-                <CardTitle>ไฟล์ที่อัปโหลด</CardTitle>
-                <CardDescription>ติดตามสถานะการประมวลผลเอกสาร</CardDescription>
+                <CardTitle>Picture</CardTitle>
+                <CardDescription>ภาพที่อัพโหลด</CardDescription>
               </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {files.map((file) => (
-                    <div key={file.id} className="flex items-center gap-4 p-4 border rounded-lg">
-                      <div className="flex-shrink-0">
-                        {file.type.startsWith("image/") ? (
-                          <ImageIcon className="h-8 w-8 text-blue-500" />
-                        ) : (
-                          <FileText className="h-8 w-8 text-blue-500" />
+              <CardContent className="flex-1 flex flex-col">
+                {selectedFile && selectedFile.fileUrl && selectedFile.type.startsWith("image/") ? (
+                  <div className="flex-1 flex items-center justify-center">
+                    <img 
+                      src={selectedFile.fileUrl} 
+                      alt={selectedFile.name}
+                      className="max-w-full max-h-full object-contain rounded-lg border"
+                    />
+                  </div>
+                ) : selectedFile && selectedFile.fileUrl && selectedFile.type === "application/pdf" ? (
+                  <div className="flex-1 flex items-center justify-center">
+                    <div className="text-center">
+                      <FileDigit className="mx-auto h-16 w-16 mb-4 text-red-500" />
+                      <p className="font-medium">{selectedFile.name}</p>
+                      <p className="text-sm text-muted-foreground">ไฟล์ PDF</p>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex-1 flex items-center justify-center text-muted-foreground">
+                    <div className="text-center">
+                      <ImageIcon className="mx-auto h-16 w-16 mb-4 opacity-50" />
+                      <p>เลือกไฟล์เพื่อดูภาพ</p>
+                    </div>
+                  </div>
+                )}
+                
+                {/* File List */}
+                {files.length > 0 && (
+                  <div className="mt-4">
+                    <Label className="text-sm font-medium mb-2 block">ไฟล์ที่อัพโหลด</Label>
+                    <div className="space-y-2 max-h-32 overflow-y-auto">
+                      {files.map((file) => (
+                        <div 
+                          key={file.id} 
+                          className={`flex items-center gap-2 p-2 border rounded cursor-pointer transition-colors ${
+                            selectedFile?.id === file.id 
+                              ? "border-primary bg-primary/5" 
+                              : "border-muted-foreground/25 hover:border-primary/25"
+                          }`}
+                          onClick={() => setSelectedFile(file)}
+                        >
+                          {getFileIcon(file.type)}
+                          <span className="text-xs truncate flex-1">{file.name}</span>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              removeFile(file.id)
+                            }}
+                            className="h-6 w-6 p-0"
+                          >
+                            <X className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Bottom-Right: OCR Detail + Advanced Extraction */}
+            <Card className="flex flex-col">
+              <CardHeader>
+                <CardTitle>OCR Detail</CardTitle>
+                <CardDescription>
+                  {selectedFile 
+                    ? `ผลลัพธ์จาก: ${selectedFile.name}` 
+                    : "เลือกไฟล์เพื่อดูผลลัพธ์ OCR"
+                  }
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="flex-1 flex flex-col">
+                {selectedFile ? (
+                  <div className="flex-1 flex flex-col space-y-4">
+                    {/* Advanced Extraction Controls */}
+                    {(selectedFile.type.startsWith("image/") || selectedFile.type === "application/pdf") && (
+                      <div className="space-y-3">
+                        <div className="flex items-center justify-between">
+                          <Label className="text-sm font-medium">การสกัดข้อมูลขั้นสูง</Label>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setShowAdvancedParams(!showAdvancedParams)}
+                            className="h-6 px-2"
+                          >
+                            <Settings className="h-3 w-3 mr-1" />
+                            {showAdvancedParams ? "ซ่อน" : "ตั้งค่า"}
+                          </Button>
+                        </div>
+                        
+                        <div className="flex gap-2">
+                          <Select value={extractionType} onValueChange={setExtractionType}>
+                            <SelectTrigger className="w-32">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="all">ทั้งหมด</SelectItem>
+                              <SelectItem value="text">ข้อความ</SelectItem>
+                              <SelectItem value="tables">ตาราง</SelectItem>
+                              <SelectItem value="forms">ฟอร์ม</SelectItem>
+                              <SelectItem value="objects">Object</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => extractAdvancedData(selectedFile)}
+                            disabled={isExtracting}
+                            className="flex-1"
+                          >
+                            {isExtracting ? (
+                              <Clock className="h-3 w-3 mr-1 animate-spin" />
+                            ) : (
+                              <Search className="h-3 w-3 mr-1" />
+                            )}
+                            {isExtracting ? "กำลังสกัด..." : "สกัดข้อมูล"}
+                          </Button>
+                        </div>
+
+                        {/* Advanced Parameters */}
+                        {showAdvancedParams && (
+                          <div className="space-y-2 p-3 border rounded-lg bg-muted/30">
+                            <Label className="text-xs font-medium">พารามิเตอร์ขั้นสูง</Label>
+                            <div className="grid grid-cols-2 gap-2 text-xs">
+                              <div>
+                                <Label className="text-xs">Model</Label>
+                                <Input
+                                  value={extractionParams.model}
+                                  onChange={(e) => setExtractionParams(prev => ({ ...prev, model: e.target.value }))}
+                                  className="h-6 text-xs"
+                                />
+                              </div>
+                              <div>
+                                <Label className="text-xs">Max Tokens</Label>
+                                <Input
+                                  type="number"
+                                  value={extractionParams.max_tokens}
+                                  onChange={(e) => setExtractionParams(prev => ({ ...prev, max_tokens: parseInt(e.target.value) }))}
+                                  className="h-6 text-xs"
+                                />
+                              </div>
+                              <div>
+                                <Label className="text-xs">Temperature</Label>
+                                <Input
+                                  type="number"
+                                  step="0.1"
+                                  value={extractionParams.temperature}
+                                  onChange={(e) => setExtractionParams(prev => ({ ...prev, temperature: parseFloat(e.target.value) }))}
+                                  className="h-6 text-xs"
+                                />
+                              </div>
+                              <div>
+                                <Label className="text-xs">Top P</Label>
+                                <Input
+                                  type="number"
+                                  step="0.1"
+                                  value={extractionParams.top_p}
+                                  onChange={(e) => setExtractionParams(prev => ({ ...prev, top_p: parseFloat(e.target.value) }))}
+                                  className="h-6 text-xs"
+                                />
+                              </div>
+                            </div>
+                          </div>
                         )}
                       </div>
+                    )}
 
-                      <div className="flex-1 min-w-0">
+                    {/* OCR Results */}
+                    {selectedFile.extractedText && (
+                      <div className="flex-1 flex flex-col">
                         <div className="flex items-center justify-between mb-2">
-                          <p className="text-sm font-medium truncate">{file.name}</p>
-                          <div className="flex items-center gap-2">
-                            {getStatusIcon(file.status)}
-                            <span className="text-xs text-muted-foreground">{getStatusText(file.status)}</span>
+                          <Label className="text-sm font-medium">ข้อความที่แยกได้</Label>
+                          <div className="flex gap-2">
                             <Button
-                              variant="ghost"
+                              variant="outline"
                               size="sm"
-                              onClick={() => removeFile(file.id)}
-                              className="h-6 w-6 p-0"
+                              onClick={() => copyToClipboard(selectedFile.extractedText!)}
                             >
-                              <X className="h-4 w-4" />
+                              <Copy className="h-3 w-3 mr-1" />
+                              คัดลอก
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => {
+                                const blob = new Blob([selectedFile.extractedText!], { type: 'text/plain' })
+                                const url = URL.createObjectURL(blob)
+                                const a = document.createElement('a')
+                                a.href = url
+                                a.download = `${selectedFile.name}_ocr.txt`
+                                a.click()
+                                URL.revokeObjectURL(url)
+                              }}
+                            >
+                              <Download className="h-3 w-3 mr-1" />
+                              ดาวน์โหลด
                             </Button>
                           </div>
                         </div>
-
-                        <div className="flex items-center justify-between text-xs text-muted-foreground mb-2">
-                          <span>{formatFileSize(file.size)}</span>
-                          {file.ocrAccuracy && <Badge variant="secondary">ความแม่นยำ: {file.ocrAccuracy}%</Badge>}
+                        <div className="flex-1 border rounded-lg p-3 bg-muted/30 overflow-y-auto">
+                          <pre className="whitespace-pre-wrap text-xs font-mono">
+                            {selectedFile.extractedText}
+                          </pre>
                         </div>
+                      </div>
+                    )}
 
-                        <Progress value={file.progress} className="h-2" />
+                    {/* Advanced Extraction Results */}
+                    {selectedFile.extractionResults && (
+                      <div className="space-y-3">
+                        <Label className="text-sm font-medium">ผลการสกัดข้อมูลขั้นสูง</Label>
+                        
+                        {/* Tables */}
+                        {selectedFile.extractionResults.tables && (
+                          <div className="space-y-2">
+                            <div className="flex items-center gap-2">
+                              <Table className="h-4 w-4 text-blue-500" />
+                              <span className="text-xs font-medium">ตารางที่พบ: {selectedFile.extractionResults.tables.tableCount || 0}</span>
+                            </div>
+                            {selectedFile.extractionResults.tables.tables?.map((table: any, index: number) => (
+                              <div key={index} className="text-xs p-2 bg-blue-50 rounded border">
+                                <div className="font-medium">ตาราง {index + 1}</div>
+                                <div className="text-muted-foreground">ประเภท: {table.type}</div>
+                                <div className="text-muted-foreground">ความแม่นยำ: {Math.round(table.confidence * 100)}%</div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
 
-                        {file.extractedText && (
-                          <div className="mt-2 p-2 bg-muted rounded text-xs">
-                            <p className="font-medium mb-1">ข้อความที่แยกได้:</p>
-                            <p className="text-muted-foreground">{file.extractedText}</p>
+                        {/* Forms */}
+                        {selectedFile.extractionResults.forms && (
+                          <div className="space-y-2">
+                            <div className="flex items-center gap-2">
+                              <FormInput className="h-4 w-4 text-green-500" />
+                              <span className="text-xs font-medium">ฟอร์มที่พบ: {selectedFile.extractionResults.forms.formCount || 0}</span>
+                            </div>
+                            {selectedFile.extractionResults.forms.fields?.map((field: any, index: number) => (
+                              <div key={index} className="text-xs p-2 bg-green-50 rounded border">
+                                <div className="font-medium">{field.label}</div>
+                                <div className="text-muted-foreground">{field.value}</div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+
+                        {/* Objects */}
+                        {selectedFile.extractionResults.objects && (
+                          <div className="space-y-2">
+                            <div className="flex items-center gap-2">
+                              <Eye className="h-4 w-4 text-purple-500" />
+                              <span className="text-xs font-medium">Object ที่พบ: {selectedFile.extractionResults.objects.objectCount || 0}</span>
+                            </div>
+                            {selectedFile.extractionResults.objects.objects?.map((obj: any, index: number) => (
+                              <div key={index} className="text-xs p-2 bg-purple-50 rounded border">
+                                <div className="font-medium">{obj.type}</div>
+                                <div className="text-muted-foreground">ความแม่นยำ: {Math.round(obj.confidence * 100)}%</div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+
+                        {/* Metadata */}
+                        {selectedFile.extractionResults.metadata && (
+                          <div className="space-y-2">
+                            <Label className="text-xs font-medium">ข้อมูลเพิ่มเติม</Label>
+                            <div className="text-xs p-2 bg-gray-50 rounded border">
+                              <div>ขนาด: {selectedFile.extractionResults.metadata.dimensions?.width || 0} x {selectedFile.extractionResults.metadata.dimensions?.height || 0}</div>
+                              <div>อัตราส่วน: {selectedFile.extractionResults.metadata.dimensions?.aspectRatio?.toFixed(2) || 0}</div>
+                              {selectedFile.extractionResults.metadata.pageCount && (
+                                <div>จำนวนหน้า: {selectedFile.extractionResults.metadata.pageCount}</div>
+                              )}
+                            </div>
                           </div>
                         )}
                       </div>
+                    )}
+
+                    {/* OCR Metadata */}
+                    {selectedFile.ocrResult && (
+                      <div className="space-y-2">
+                        <Label className="text-sm font-medium">ข้อมูลเพิ่มเติม</Label>
+                        <div className="border rounded-lg p-3 bg-muted/30">
+                          <div className="grid grid-cols-2 gap-2 text-xs">
+                            <div>
+                              <span className="font-medium">ภาษา:</span>
+                              <span className="ml-1">{selectedFile.ocrResult.language || 'ไม่ระบุ'}</span>
+                            </div>
+                            <div>
+                              <span className="font-medium">ความแม่นยำ:</span>
+                              <span className="ml-1">{selectedFile.ocrResult.confidence || 'ไม่ระบุ'}</span>
+                            </div>
+                            <div>
+                              <span className="font-medium">จำนวนคำ:</span>
+                              <span className="ml-1">{selectedFile.extractedText?.split(/\s+/).length || 0}</span>
+                            </div>
+                            <div>
+                              <span className="font-medium">ขนาดไฟล์:</span>
+                              <span className="ml-1">{formatFileSize(selectedFile.size)}</span>
+                            </div>
+                            {/* แสดงขนาดภาพถ้ามี */}
+                            {selectedFile.dimensions && selectedFile.dimensions.width > 0 && (
+                              <>
+                                <div>
+                                  <span className="font-medium">ขนาดภาพ:</span>
+                                  <span className="ml-1">{selectedFile.dimensions.width} x {selectedFile.dimensions.height}</span>
+                                </div>
+                                <div>
+                                  <span className="font-medium">อัตราส่วน:</span>
+                                  <span className="ml-1">{selectedFile.dimensions.aspectRatio.toFixed(2)}</span>
+                                </div>
+                              </>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div className="flex-1 flex items-center justify-center text-muted-foreground">
+                    <div className="text-center">
+                      <FileText className="mx-auto h-16 w-16 mb-4 opacity-50" />
+                      <p>เลือกไฟล์เพื่อดูผลลัพธ์ OCR</p>
                     </div>
-                  ))}
-                </div>
+                  </div>
+                )}
               </CardContent>
             </Card>
-          )}
+          </div>
         </div>
       </SidebarInset>
     </SidebarProvider>
