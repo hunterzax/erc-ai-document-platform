@@ -35,7 +35,8 @@ export default function RootLayout({
         />
 
       </head>
-      <body className={`font-sans ${GeistSans.variable} ${GeistMono.variable}`}>
+      {/* <body className={`font-sans ${GeistSans.variable} ${GeistMono.variable}`}> */}
+      <body className={`font-sans `}>
         <Suspense fallback={null}>
           <ThemeProvider attribute="class" defaultTheme="light" enableSystem disableTransitionOnChange>
             {children}
