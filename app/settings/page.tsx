@@ -129,7 +129,7 @@ export default function SettingsPage() {
       <Tabs defaultValue="system" className="space-y-6">
         <ToastContainer />
 
-        <AIConfigModal />
+        <AIConfigModal mode={'dialog'}/>
         {/* <TabsList className="grid w-full grid-cols-5">
               <TabsTrigger value="system">ระบบ</TabsTrigger>
               <TabsTrigger value="security">ความปลอดภัย</TabsTrigger>
