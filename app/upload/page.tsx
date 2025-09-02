@@ -26,6 +26,17 @@ import { useToast } from "@/hooks/use-toast"
 import { AppHeader } from "@/components/header-bar"
 import PdfViewer from "@/components/ui/pdfviewer"
 import axios from "axios"
+interface ImageItem {
+  source: string;
+  typhoon_ocr: string;
+}
+
+interface ImageWithHex {
+  hex: string; // หรือ base64 string
+  typhoon_ocr: string;
+}
+
+
 const tokenURL = process.env.NEXT_PUBLIC_N8N_BASE_URL;
 
 interface UploadedFile {
@@ -76,6 +87,8 @@ export default function UploadPage() {
     repetition_penalty: 1.2,
     pages: []
   })
+
+
   const { toast } = useToast()
 
   const onDrop = useCallback(async (acceptedFiles: File[]) => {
@@ -96,6 +109,17 @@ export default function UploadPage() {
     }
   }, [])
 
+
+
+
+
+  // #region IMAGE state
+  const [imagesWithHex, setImagesWithHex] = useState<ImageWithHex[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [selected, setSelected] = useState<ImageWithHex | null>(null);
+
+
+  // #region processFile
   const processFile = async (file: UploadedFile, originalFile: File) => {
     try {
 
@@ -132,9 +156,77 @@ export default function UploadPage() {
         //   type: file?.type
         // }
 
-        console.log(">>> postOCR", postOCR)
-        setTimeout(() => {
-          getOCR(`${postOCR?.data?.pdf_name}.pdf`)
+
+
+        setTimeout(async () => {
+
+          // step 2 data 
+          // ส่ง postOCR?.data?.pdf_name
+          // เอาชื่อไฟล์ใน res.images
+          //http://10.100.92.20:4600/qdrant/file_name/docs_section_single/ตัวอย่างใบเสร็จ.pdf
+          console.log(">>> postOCR", postOCR)
+          // console.log(">>> postOCR", postOCR?.data?.pdf_name)
+          const res_step_1 = await getOCR(`${postOCR?.data?.pdf_name}.pdf`)
+          console.log('res_step_1', res_step_1)
+
+          // วนลูปส่ง res_step_1_k.images.source ไปที่ getImageOfPage 
+          // ซึ่ง response จาก getImageOfPage จะได้เป็นรูป เราน่าจะเอา hexcode มาเก็บไว้ได้
+          // หลังจากนั้นต้องเก็บ res_step_1_k.images.typhoon_ocr ไว้คู่กับแต่ละรูป จะใช้ state ก็ได้ 
+          // แล้วนำไปแสดงผลใน card ทุกรูป เมื่อกดรูปนั้น ๆ แสดง modal ด้านซ้ายเป็นรูป ด้านขวาเป็นข้อความจาก res_step_1_k.images.typhoon_ocr
+          // ระหว่างวนลูปทำ loading ไว้ก็ดี
+
+          let res_step_1_k = {
+            "ok": true,
+            "error": null,
+            "file_name": "หนังสือเชิญ NMS.pdf",
+            "id": "2040bf92-f18e-47b4-8d7c-5ce0ac295d5f",
+            "vectors": null,
+            "images": [
+              {
+                "source": "หนังสือเชิญ NMS_page_1.png",
+                "typhoon_ocr": 'content'
+              },
+              {
+                "source": "หนังสือเชิญ NMS_page_2.png",
+                "typhoon_ocr": 'content'
+              },
+              {
+                "source": "หนังสือเชิญ NMS_page_3.png",
+                "typhoon_ocr": 'content'
+              }
+            ]
+          }
+
+          setLoading(true); // ของ image show
+
+          // step 4 เอาภาพแต่ละเพจ
+          // const results: ImageWithHex[] = [];
+          // for (const img of res_step_1.images) {
+          //   try {
+          //     const hex: any = await getImageOfPage(img.source); // สมมติได้ hex/base64 กลับมา
+          //     results.push({ hex, typhoon_ocr: img.typhoon_ocr });
+          //   } catch (err) {
+          //     console.error("Failed to fetch image:", img.source, err);
+          //   }
+          // }
+          // setImagesWithHex(results);
+
+          // step 4 เอาภาพแต่ละเพจ
+          for (const img of res_step_1.images) {
+            try {
+              const hex = await getImageOfPage(img.source);
+              console.log('hex', hex)
+              setImagesWithHex((prev: any) => [...prev, { hex, typhoon_ocr: img.typhoon_ocr }]);
+            } catch (err) {
+              console.error("Failed to fetch image:", img.source, err);
+            }
+          }
+
+          setLoading(false); // ของ image show
+
+          // step 4 เอาภาพแต่ละเพจ
+          // await getImageOfPage(res_step_1_k?.images?.source)
+
           setisLoading(false);
         }, 100);
       }
@@ -217,6 +309,18 @@ export default function UploadPage() {
       // })
     }
   }
+
+  useEffect(() => {
+    console.log('imagesWithHex', imagesWithHex)
+  }, [imagesWithHex])
+
+
+
+  useEffect(() => {
+    console.log('selected', selected)
+  }, [selected])
+
+
 
   // ฟังก์ชันหาขนาดภาพบน client-side
   const getImageDimensions = (file: File): Promise<{ width: number, height: number, aspectRatio: number }> => {
@@ -378,23 +482,60 @@ export default function UploadPage() {
 
   const [isLoading, setisLoading] = useState<boolean>(true);
 
+  // #region step 2
+  // step 2
   const getOCR = async (filename: any) => {
     try {
       const getData = await axios.get(`${tokenURL}/qdrant/file_name/docs_section_single/${filename}`);
-
       console.log(">>> getData", getData);
+
+      return getData?.data
     } catch (error: any) {
       // ❌ กรณีเกิดข้อผิดพลาด
       if (axios.isAxiosError(error)) {
         if (error.response) {
           // console.error("❌ Server error:", error.response.status);
+          return {}
         } else if (error.request) {
           // console.error("❌ Network error: No response received.");
+          return {}
         } else {
           // console.error("❌ Axios config error:", error.message);
+          return {}
         }
       } else {
         // console.error("❌ Unexpected error:", error);
+        return {}
+      }
+
+      // setdataList([]);
+      // setisLoading(false);
+    }
+  }
+
+
+  // #region step 4
+  // step 4
+  const getImageOfPage = async (pageName?: any) => {
+    try {
+      const res_get_image = await axios.get(`${tokenURL}/raw_docs_files_images/${pageName}`);
+      console.log(">>> res_get_image", res_get_image);
+      return res_get_image
+    } catch (error: any) {
+      if (axios.isAxiosError(error)) {
+        if (error.response) {
+          // console.error("❌ Server error:", error.response.status);
+          return {}
+        } else if (error.request) {
+          // console.error("❌ Network error: No response received.");
+          return {}
+        } else {
+          // console.error("❌ Axios config error:", error.message);
+          return {}
+        }
+      } else {
+        // console.error("❌ Unexpected error:", error);
+        return {}
       }
 
       // setdataList([]);
@@ -524,6 +665,82 @@ export default function UploadPage() {
               </CardContent>
             </Card>
 
+
+
+
+
+
+
+
+
+
+
+
+
+            {/* service พร้อมต่อ สุดหล่อพร้อมยัง */}
+            <Card className="flex flex-col col-span-2 bg-white">
+              <CardHeader>
+                <CardTitle>OCR Image Details</CardTitle>
+                <CardDescription>
+                  {'ผลลัพธ์จาก OCR'}
+                  {/* {selectedFile ? `ผลลัพธ์จาก: ${selectedFile.name}`: "เลือกไฟล์เพื่อดูผลลัพธ์ OCR"} */}
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="flex-1 flex flex-col">
+                <div className="flex-1 flex items-center justify-center text-muted-foreground">
+                  <div className="text-center">
+                    <FileText className="mx-auto h-16 w-16 mb-4 opacity-50" />
+                    <p>กรุณาอัพโหลดไฟล์เพื่อดูผลลัพธ์ OCR</p>
+                  </div>
+                </div>
+
+                <div className="p-4">
+                  {loading && <div>Loading images...</div>}
+
+                  <div className="grid grid-cols-3 gap-4 mt-4">
+                    {!loading && imagesWithHex.map((img, idx) => (
+                      <div
+                        key={idx}
+                        className="border p-2 cursor-pointer"
+                        onClick={() => setSelected(img)}
+                      >
+                        <img src={img.hex} alt={`page-${idx}`} className="w-full" />
+                      </div>
+                    ))}
+
+                    {/* Modal */}
+                    {selected && (
+                      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                        <div className="bg-white w-3/4 h-3/4 flex">
+                          <div className="w-1/2 p-2 border-r">
+                            <img src={selected.hex} alt="selected" className="w-full h-full object-contain" />
+                          </div>
+                          <div className="w-1/2 p-4 overflow-auto">
+                            <pre>{selected.typhoon_ocr}</pre>
+                          </div>
+                          <button
+                            className="absolute top-2 right-2 p-2 bg-red-500 text-white rounded"
+                            onClick={() => setSelected(null)}
+                          >
+                            Close
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+
+
+
+
+
+
+
+
+            {/* ของอิง */}
             {/* Bottom-Left: Picture Display */}
             <Card className="flex flex-col col-span-2 bg-white">
               <CardHeader>
@@ -594,6 +811,13 @@ export default function UploadPage() {
               </CardContent>
             </Card>
 
+
+
+
+
+
+
+            {/* ของอิง */}
             {/* Bottom-Right: OCR Detail + Advanced Extraction */}
             <Card className="flex flex-col col-span-2 bg-white">
               <CardHeader>
@@ -865,6 +1089,12 @@ export default function UploadPage() {
                 )}
               </CardContent>
             </Card>
+
+
+
+
+
+
           </div>
         </div>
       </SidebarInset>
