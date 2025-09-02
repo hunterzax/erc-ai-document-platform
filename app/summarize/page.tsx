@@ -42,7 +42,6 @@ export default function SummarizePage() {
     }
   }
 
-
   const handleSummarize = async () => {
     setIsGenerating(true)
 
@@ -239,6 +238,14 @@ export default function SummarizePage() {
                 )}
               </CardContent>
             </Card>
+
+
+
+
+
+
+
+            
           </div>
         </div>
       </SidebarInset>

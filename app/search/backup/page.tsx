@@ -19,12 +19,9 @@ import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Search, Filter, Download, FileText, Calendar, Tag, Brain, Eye, Clock, Star, Copy } from "lucide-react"
-import { useEffect, useState } from "react"
+import { Search, Filter, Download, FileText, Calendar, Tag, Brain, Eye, Clock, Star } from "lucide-react"
+import { useState } from "react"
 import { AppHeader } from "@/components/header-bar"
-const axios = require('axios');
-
-const URL_SEARCH = process.env.NEXT_PUBLIC_N8N_BASE_URL_SEARCH;
 
 interface SearchResult {
   id: string
@@ -86,33 +83,14 @@ export default function SearchPage() {
   const [documentCategory, setDocumentCategory] = useState("all")
   const [searchResults, setSearchResults] = useState<SearchResult[]>([])
   const [isSearching, setIsSearching] = useState(false)
-  const [isSearchClick, setIsSearchClick] = useState(false)
   const [activeTab, setActiveTab] = useState("keyword")
 
   const handleSearch = async () => {
     setIsSearching(true)
-    setIsSearchClick(true)
-
-    // summaryType
-    let config = {
-      method: 'get',
-      maxBodyLength: Infinity,
-      url: `${URL_SEARCH}?q=${searchQuery}&limit=10`,
-      headers: {}
-    };
-
-    let res_search_result = await axios.request(config)
-    console.log('res_search_result', res_search_result)
-
-    // กรอง source ซ้ำออก
-    const uniqueBySource = res_search_result?.data?.items?.filter((item:any, index:any, self:any) => index === self.findIndex((t:any) => t.source === item.source));
-
     // Simulate search delay
     setTimeout(() => {
       if (searchQuery.trim()) {
-        // setSearchResults(mockSearchResults)
-        // setSearchResults(res_search_result?.data?.items)
-        setSearchResults(uniqueBySource)
+        setSearchResults(mockSearchResults)
       } else {
         setSearchResults([])
       }
@@ -123,26 +101,6 @@ export default function SearchPage() {
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === "Enter") {
       handleSearch()
-    }
-  }
-
-  useEffect(() => {
-    if (searchQuery == '') {
-      setIsSearchClick(false)
-    }
-  }, [searchQuery])
-
-
-  // #region copy to clipboard
-  const [copiedId, setCopiedId] = useState<number | null>(null)
-
-  const handleCopy = async (text: string, id: number) => {
-    try {
-      await navigator.clipboard.writeText(text)
-      setCopiedId(id)
-      setTimeout(() => setCopiedId(null), 1500) // reset state หลัง 1.5 วิ
-    } catch (err) {
-      console.error("Failed to copy: ", err)
     }
   }
 
@@ -261,10 +219,10 @@ export default function SearchPage() {
 
 
 
-
+          
 
           {/* Search Results */}
-          {/* {searchResults.length > 0 && (
+          {searchResults.length > 0 && (
             <Card>
               <CardHeader>
                 <div className="flex items-center justify-between">
@@ -399,74 +357,10 @@ export default function SearchPage() {
                 </Tabs>
               </CardContent>
             </Card>
-          )} */}
-
-
-
-
-
-
-
-          {
-            searchQuery && searchResults.length > 0 && !isSearching && (
-              <div className="w-full space-y-4">
-                {searchResults.map((item: any, idx) => (
-                  <Card key={item.id} className="w-full shadow-sm hover:shadow-md transition rounded-xl">
-                    <CardHeader className="flex flex-row items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <FileText className="h-5 w-5 text-blue-500" />
-                        <CardTitle className="text-base">{item.source}</CardTitle>
-                      </div>
-
-
-                      {/* <CardDescription className="text-sm text-gray-500">
-                        คะแนน: {item.score.toFixed(3)} | หน้า: {item.pages?.join(", ") || "-"}
-                      </CardDescription> */}
-
-
-                      <div className="flex items-center gap-3">
-                        <CardDescription className="text-sm text-gray-500">
-                          คะแนน: {item.score.toFixed(3)} | หน้า: {item.pages?.join(", ") || "-"}
-                        </CardDescription>
-
-                        {/* <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleCopy(item.content, item.id)}
-                        >
-                          <Copy className="h-4 w-4 mr-2" />
-                          {copiedId === item.id ? "คัดลอกแล้ว" : "คัดลอก"}
-                        </Button> */}
-
-                        <Button
-                          variant={copiedId === item.id ? "default" : "outline"}
-                          size="sm"
-                          className={copiedId === item.id ? "bg-[#87B14B] hover:bg-green-600 text-white" : ""}
-                          onClick={() => handleCopy(item.content, item.id)}
-                        >
-                          <Copy className="h-4 w-4 mr-2" />
-                          {copiedId === item.id ? "คัดลอกแล้ว" : "คัดลอก"}
-                        </Button>
-                      </div>
-                    </CardHeader>
-
-                    <CardContent className="p-4">
-                      <pre className="whitespace-pre-wrap break-words text-sm text-gray-800 max-h-40 overflow-y-auto">
-                        {item.content}
-                      </pre>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            )
-          }
-
-
-
-
+          )}
 
           {/* No Results */}
-          {searchResults.length === 0 && isSearchClick && (
+          {searchQuery && searchResults.length === 0 && !isSearching && (
             <Card>
               <CardContent className="text-center py-8">
                 <Search className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
