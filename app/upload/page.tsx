@@ -110,29 +110,45 @@ export default function UploadPage() {
       }
 
       const result = await response.json()
-      
-              // Get image dimensions if it's an image file
-        let dimensions: {width: number, height: number, aspectRatio: number} | undefined
-        if (originalFile.type.startsWith('image/')) {
-          dimensions = await getImageDimensions(originalFile)
-        }
-      
+
+      // Get image dimensions if it's an image file
+      let dimensions: { width: number, height: number, aspectRatio: number } | undefined
+      if (originalFile.type.startsWith('image/')) {
+        dimensions = await getImageDimensions(originalFile)
+      }
+
+      console.log(">>> file", file)
+
+      const newFile: any = {
+        id: file?.id,
+        status: "completed",
+        progress: 100,
+        ocrResult: result.data.ocrResult,
+        extractedText: result.data.ocrResult?.text || 'ไม่สามารถแยกข้อความได้',
+        fileUrl: URL.createObjectURL(originalFile),
+        dimensions: dimensions,
+        size: file?.size,
+        name: file?.name,
+        type: file?.type
+      }
       // Update file status to completed
       setFiles((prev) =>
         prev.map((f) =>
           f.id === file.id
             ? {
-                ...f,
-                status: "completed",
-                progress: 100,
-                ocrResult: result.data.ocrResult,
-                extractedText: result.data.ocrResult?.text || 'ไม่สามารถแยกข้อความได้',
-                fileUrl: URL.createObjectURL(originalFile),
-                dimensions: dimensions
-              }
+              ...f,
+              status: "completed",
+              progress: 100,
+              ocrResult: result.data.ocrResult,
+              extractedText: result.data.ocrResult?.text || 'ไม่สามารถแยกข้อความได้',
+              fileUrl: URL.createObjectURL(originalFile),
+              dimensions: dimensions
+            }
             : f
         )
       )
+
+      setSelectedFile(newFile);
 
       toast({
         title: "อัพโหลดสำเร็จ",
@@ -158,7 +174,7 @@ export default function UploadPage() {
   }
 
   // ฟังก์ชันหาขนาดภาพบน client-side
-  const getImageDimensions = (file: File): Promise<{width: number, height: number, aspectRatio: number}> => {
+  const getImageDimensions = (file: File): Promise<{ width: number, height: number, aspectRatio: number }> => {
     return new Promise((resolve) => {
       const img = new Image()
       img.onload = () => {
@@ -189,7 +205,7 @@ export default function UploadPage() {
       const formData = new FormData()
       formData.append('file', fileObj)
       formData.append('type', extractionType)
-      
+
       // เพิ่ม parameters สำหรับการสกัดข้อมูล
       if (showAdvancedParams) {
         formData.append('params', JSON.stringify(extractionParams))
@@ -205,7 +221,7 @@ export default function UploadPage() {
       }
 
       const result = await extractResponse.json()
-      
+
       // Update file with extraction results
       setFiles((prev) =>
         prev.map((f) =>
@@ -265,7 +281,7 @@ export default function UploadPage() {
       "application/vnd.openxmlformats-officedocument.wordprocessingml.document": [".docx"],
       "image/*": [".png", ".jpg", ".jpeg", ".tiff"],
     },
-    multiple: true,
+    multiple: false,
   })
 
   const formatFileSize = (bytes: number) => {
@@ -315,18 +331,20 @@ export default function UploadPage() {
     }
   }
 
+  console.log(">>> selectedFile", selectedFile)
+
   return (
     <SidebarProvider>
       <AppSidebar />
       <SidebarInset>
-        <AppHeader title={'อัปโหลดเอกสาร'}/>
+        <AppHeader title={'อัปโหลดเอกสาร'} />
 
         <div className="flex flex-1 flex-col gap-6 p-4">
           {/* 2x2 Grid Layout */}
-          <div className="grid grid-cols-2 gap-6 h-[600px]">
-            
+          <div className="grid grid-cols-4 gap-6 h-[600px]">
+
             {/* Top-Left: Drop files here + Progress */}
-            <Card className="flex flex-col">
+            <Card className="flex flex-col-2 col-span-3 bg-white">
               <CardHeader>
                 <CardTitle>อัปโหลดเอกสาร</CardTitle>
                 <CardDescription>รองรับไฟล์ PDF, Word, และรูปภาพ</CardDescription>
@@ -334,9 +352,8 @@ export default function UploadPage() {
               <CardContent className="flex-1 flex flex-col">
                 <div
                   {...getRootProps()}
-                  className={`border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-colors flex-1 flex flex-col justify-center ${
-                    isDragActive ? "border-primary bg-primary/5" : "border-muted-foreground/25 hover:border-primary/50"
-                  }`}
+                  className={`border border-dashed rounded-lg p-6 text-center cursor-pointer transition-colors flex-1 flex flex-col items-center justify-center hover:bg-blue-200/30 ${isDragActive ? "border-primary bg-primary/5" : "border-muted-foreground/25 hover:border-primary/50"
+                    }`}
                 >
                   <input {...getInputProps()} />
                   <Upload className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
@@ -346,14 +363,14 @@ export default function UploadPage() {
                     <>
                       <p className="text-lg font-medium mb-2">ลากและวางไฟล์ที่นี่</p>
                       <p className="text-sm text-muted-foreground mb-4">หรือคลิกเพื่อเลือกไฟล์</p>
-                      <Button variant="outline">เลือกไฟล์</Button>
+                      <Button variant="outline" className="w-fit">เลือกไฟล์</Button>
                     </>
                   )}
-                  
+
                   {/* Progress Bar Inside Drop Zone */}
-                  {files.length > 0 && (
+                  {files?.length > 0 && (
                     <div className="mt-6 w-full">
-                      <Label className="text-sm font-medium mb-2 block">Progress Upload</Label>
+                      <Label className="text-sm font-medium mb-2 block text-left">Progress Upload</Label>
                       {files.map((file) => (
                         <div key={file.id} className="mb-3">
                           <div className="flex items-center justify-between text-xs mb-1">
@@ -370,7 +387,7 @@ export default function UploadPage() {
             </Card>
 
             {/* Top-Right: Document Detail */}
-            <Card className="flex flex-col">
+            <Card className="flex flex-col col-span-1 bg-white">
               <CardHeader>
                 <CardTitle>Document Detail</CardTitle>
                 <CardDescription>ข้อมูลเอกสาร</CardDescription>
@@ -378,8 +395,8 @@ export default function UploadPage() {
               <CardContent className="flex-1 space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="document-type">ประเภทเอกสาร</Label>
-                  <Select value={documentType} onValueChange={setDocumentType}>
-                    <SelectTrigger>
+                  <Select value={documentType} onValueChange={setDocumentType} disabled={selectedFile ? false : true}>
+                    <SelectTrigger className="w-full border border-[#dedede]">
                       <SelectValue placeholder="เลือกประเภทเอกสาร" />
                     </SelectTrigger>
                     <SelectContent>
@@ -394,8 +411,8 @@ export default function UploadPage() {
 
                 <div className="space-y-2">
                   <Label htmlFor="document-year">ปี พ.ศ.</Label>
-                  <Select value={documentYear} onValueChange={setDocumentYear}>
-                    <SelectTrigger>
+                  <Select value={documentYear} onValueChange={setDocumentYear} disabled={selectedFile ? false : true}>
+                    <SelectTrigger className="w-full border border-[#dedede]">
                       <SelectValue placeholder="เลือกปี" />
                     </SelectTrigger>
                     <SelectContent>
@@ -410,8 +427,8 @@ export default function UploadPage() {
 
                 <div className="space-y-2">
                   <Label htmlFor="document-category">หมวดหมู่</Label>
-                  <Select value={documentCategory} onValueChange={setDocumentCategory}>
-                    <SelectTrigger>
+                  <Select value={documentCategory} onValueChange={setDocumentCategory} disabled={selectedFile ? false : true}>
+                    <SelectTrigger className="w-full border border-[#dedede]">
                       <SelectValue placeholder="เลือกหมวดหมู่" />
                     </SelectTrigger>
                     <SelectContent>
@@ -431,14 +448,15 @@ export default function UploadPage() {
                     placeholder="เพิ่มคำอธิบายเกี่ยวกับเอกสาร..."
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
-                    className="flex-1"
+                    className="flex-1 w-full border border-[#dedede]"
+                    disabled={selectedFile ? false : true}
                   />
                 </div>
               </CardContent>
             </Card>
 
             {/* Bottom-Left: Picture Display */}
-            <Card className="flex flex-col">
+            <Card className="flex flex-col col-span-2 bg-white">
               <CardHeader>
                 <CardTitle>Picture</CardTitle>
                 <CardDescription>ภาพที่อัพโหลด</CardDescription>
@@ -446,8 +464,8 @@ export default function UploadPage() {
               <CardContent className="flex-1 flex flex-col">
                 {selectedFile && selectedFile.fileUrl && selectedFile.type.startsWith("image/") ? (
                   <div className="flex-1 flex items-center justify-center">
-                    <img 
-                      src={selectedFile.fileUrl} 
+                    <img
+                      src={selectedFile.fileUrl}
                       alt={selectedFile.name}
                       className="max-w-full max-h-full object-contain rounded-lg border"
                     />
@@ -468,20 +486,19 @@ export default function UploadPage() {
                     </div>
                   </div>
                 )}
-                
+
                 {/* File List */}
                 {files.length > 0 && (
                   <div className="mt-4">
                     <Label className="text-sm font-medium mb-2 block">ไฟล์ที่อัพโหลด</Label>
                     <div className="space-y-2 max-h-32 overflow-y-auto">
                       {files.map((file) => (
-                        <div 
-                          key={file.id} 
-                          className={`flex items-center gap-2 p-2 border rounded cursor-pointer transition-colors ${
-                            selectedFile?.id === file.id 
-                              ? "border-primary bg-primary/5" 
-                              : "border-muted-foreground/25 hover:border-primary/25"
-                          }`}
+                        <div
+                          key={file.id}
+                          className={`flex items-center gap-2 p-2 border rounded cursor-pointer transition-colors ${selectedFile?.id === file.id
+                            ? "border-primary bg-primary/5"
+                            : "border-muted-foreground/25 hover:border-primary/25"
+                            }`}
                           onClick={() => setSelectedFile(file)}
                         >
                           {getFileIcon(file.type)}
@@ -506,12 +523,12 @@ export default function UploadPage() {
             </Card>
 
             {/* Bottom-Right: OCR Detail + Advanced Extraction */}
-            <Card className="flex flex-col">
+            <Card className="flex flex-col col-span-2 bg-white">
               <CardHeader>
                 <CardTitle>OCR Detail</CardTitle>
                 <CardDescription>
-                  {selectedFile 
-                    ? `ผลลัพธ์จาก: ${selectedFile.name}` 
+                  {selectedFile
+                    ? `ผลลัพธ์จาก: ${selectedFile.name}`
                     : "เลือกไฟล์เพื่อดูผลลัพธ์ OCR"
                   }
                 </CardDescription>
@@ -524,7 +541,9 @@ export default function UploadPage() {
                       <div className="space-y-3">
                         <div className="flex items-center justify-between">
                           <Label className="text-sm font-medium">การสกัดข้อมูลขั้นสูง</Label>
-                          <Button
+
+                          {/* ปิดไว้ก่อน */}
+                          {/* <Button
                             variant="ghost"
                             size="sm"
                             onClick={() => setShowAdvancedParams(!showAdvancedParams)}
@@ -532,12 +551,12 @@ export default function UploadPage() {
                           >
                             <Settings className="h-3 w-3 mr-1" />
                             {showAdvancedParams ? "ซ่อน" : "ตั้งค่า"}
-                          </Button>
+                          </Button> */}
                         </div>
-                        
-                        <div className="flex gap-2">
+
+                        <div className="flex gap-2 h-full">
                           <Select value={extractionType} onValueChange={setExtractionType}>
-                            <SelectTrigger className="w-32">
+                            <SelectTrigger className="w-40 border border-[#dedede]">
                               <SelectValue />
                             </SelectTrigger>
                             <SelectContent>
@@ -553,7 +572,7 @@ export default function UploadPage() {
                             size="sm"
                             onClick={() => extractAdvancedData(selectedFile)}
                             disabled={isExtracting}
-                            className="flex-1"
+                            className="flex-1 h-[36px] p-2"
                           >
                             {isExtracting ? (
                               <Clock className="h-3 w-3 mr-1 animate-spin" />
@@ -621,6 +640,7 @@ export default function UploadPage() {
                             <Button
                               variant="outline"
                               size="sm"
+                              disabled={selectedFile?.extractedText == 'ไม่สามารถแยกข้อความได้' ? true : false}
                               onClick={() => copyToClipboard(selectedFile.extractedText!)}
                             >
                               <Copy className="h-3 w-3 mr-1" />
@@ -638,6 +658,7 @@ export default function UploadPage() {
                                 a.click()
                                 URL.revokeObjectURL(url)
                               }}
+                              disabled={selectedFile?.extractedText == 'ไม่สามารถแยกข้อความได้' ? true : false}
                             >
                               <Download className="h-3 w-3 mr-1" />
                               ดาวน์โหลด
@@ -656,7 +677,7 @@ export default function UploadPage() {
                     {selectedFile.extractionResults && (
                       <div className="space-y-3">
                         <Label className="text-sm font-medium">ผลการสกัดข้อมูลขั้นสูง</Label>
-                        
+
                         {/* Tables */}
                         {selectedFile.extractionResults.tables && (
                           <div className="space-y-2">
