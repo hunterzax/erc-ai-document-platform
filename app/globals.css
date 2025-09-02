@@ -18,6 +18,22 @@
   border-radius: 10px;
 }
 
+.anifade {
+  animation: fadeup 1s !important;
+}
+
+@keyframes fadeup {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 @custom-variant dark (&:is(.dark *));
 
 :root {
@@ -136,6 +152,7 @@
   * {
     @apply border-border outline-ring/50;
   }
+
   body {
     @apply bg-background text-foreground;
   }

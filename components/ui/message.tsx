@@ -78,9 +78,23 @@ const MessageContent = ({
   }, [children])
 
   return markdown ? (
-    <Markdown className={classNames} {...props}>
-      {content}
-    </Markdown>
+    // <Markdown className={classNames} {...props}>
+    //   {/* {content} */}
+    //   {content?.split("\n").map((line, index) => {
+    //     return (
+    //       <React.Fragment key={index}>
+    //         {line}
+    //         <br />
+    //       </React.Fragment>
+    //     )
+    //   })}
+    // </Markdown>
+    content?.split("\n").map((line, index) => (
+      <React.Fragment key={index}>
+        {line}
+        <br />
+      </React.Fragment>
+    ))
   ) : (
     <div className={classNames} {...props}>
       {children}

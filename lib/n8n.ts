@@ -35,6 +35,7 @@ export function getDefaultWebhookUrl(): string | null {
 export async function checkN8nHealth(): Promise<{ healthy: boolean; message: string }> {
   try {
     const baseUrl = process.env.N8N_BASE_URL || 'http://localhost:5678'
+    console.log('=========>',baseUrl)
     const response = await axios.get(`${baseUrl}/api/v1/health`, {
       timeout: 5000
     })
@@ -184,7 +185,7 @@ export async function n8nChatCompletion(
   try {
     // Use provided webhook URL or default from environment
     const targetWebhookUrl = webhookUrl || getDefaultWebhookUrl()
-    
+    console.log('=========>',targetWebhookUrl)
     if (!targetWebhookUrl) {
       return {
         success: false,
@@ -201,7 +202,7 @@ export async function n8nChatCompletion(
 
     // Execute the webhook
     const result = await executeWebhook(targetWebhookUrl, data)
-
+    console.log(result)
     if (!result.success) {
       return {
         success: false,

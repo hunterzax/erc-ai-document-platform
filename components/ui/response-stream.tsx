@@ -348,7 +348,16 @@ function ResponseStream({
   const renderContent = () => {
     switch (mode) {
       case "typewriter":
-        return <>{displayedText}</>
+        return (
+          <>
+            {displayedText.split("\n").map((line, index) => (
+              <React.Fragment key={index}>
+                {line}
+                <br />
+              </React.Fragment>
+            ))}
+          </>
+        )
 
       case "fade":
         return (
