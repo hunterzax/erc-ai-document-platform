@@ -35,10 +35,10 @@ const monthlyData = [
 ]
 
 const documentTypeData = [
-  { name: "กฎหมาย", value: 45, color: "hsl(var(--chart-1))" },
-  { name: "ระเบียบ", value: 30, color: "hsl(var(--chart-2))" },
-  { name: "ประกาศ", value: 15, color: "hsl(var(--chart-3))" },
-  { name: "หนังสือเวียน", value: 10, color: "hsl(var(--chart-4))" },
+  { name: "กฎหมาย", value: 45, color: "#8AC42D" },
+  { name: "ระเบียบ", value: 30, color: "#27A9F5" },
+  { name: "ประกาศ", value: 15, color: "#E3902D" },
+  { name: "หนังสือเวียน", value: 10, color: "#E34E2D" },
 ]
 
 const performanceData = [
@@ -88,11 +88,11 @@ export default function ReportsPage() {
               <CardDescription>เลือกประเภทรายงานและช่วงเวลาที่ต้องการ</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="flex flex-wrap gap-4 items-end">
-                <div className="space-y-2">
+              <div className="grid gap-4 md:grid-cols-5">
+                <div className="space-y-2 col-span-1">
                   <label className="text-sm font-medium">ประเภทรายงาน</label>
                   <Select value={reportType} onValueChange={setReportType}>
-                    <SelectTrigger className="w-48">
+                    <SelectTrigger className="w-full border border-[#dedede]">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -105,10 +105,10 @@ export default function ReportsPage() {
                   </Select>
                 </div>
 
-                <div className="space-y-2">
+                <div className="space-y-2 col-span-1">
                   <label className="text-sm font-medium">หน่วยงาน</label>
                   <Select value={selectedDepartment} onValueChange={setSelectedDepartment}>
-                    <SelectTrigger className="w-48">
+                    <SelectTrigger className="w-full border border-[#dedede]">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -121,11 +121,11 @@ export default function ReportsPage() {
                   </Select>
                 </div>
 
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">วันที่</label>
+                <div className="space-y-2 grid grid-cols-1 col-span-1">
+                  <label className="text-sm font-medium mb-1">วันที่</label>
                   <Popover>
                     <PopoverTrigger asChild>
-                      <Button variant="outline" className="w-48 justify-start text-left font-normal bg-transparent">
+                      <Button variant="outline" className="w-full justify-start text-left font-normal bg-transparent border border-[#dedede]">
                         <CalendarIcon className="mr-2 h-4 w-4" />
                         {dateRange ? format(dateRange, "PPP", { locale: th }) : "เลือกวันที่"}
                       </Button>
@@ -136,7 +136,7 @@ export default function ReportsPage() {
                   </Popover>
                 </div>
 
-                <div className="flex gap-2">
+                <div className="flex gap-2 col-span-2 items-end justify-end">
                   <Button onClick={() => generateReport("pdf")}>
                     <Download className="h-4 w-4 mr-2" />
                     PDF
@@ -163,7 +163,7 @@ export default function ReportsPage() {
             <CardContent>
               <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
                 {performanceData.map((item, index) => (
-                  <div key={index} className="p-4 border rounded-lg">
+                  <div key={index} className="p-4 border rounded-lg shadow-sm hover:shadow-md duration-200 ease-in-out">
                     <div className="flex items-center justify-between mb-2">
                       <span className="text-sm font-medium">{item.metric}</span>
                       {getStatusBadge(item.status)}
@@ -199,7 +199,7 @@ export default function ReportsPage() {
                       color: "hsl(var(--chart-3))",
                     },
                   }}
-                  className="h-[300px]"
+                  className="h-[300px] w-full"
                 >
                   <ResponsiveContainer width="100%" height="100%">
                     <LineChart data={monthlyData}>
@@ -207,9 +207,9 @@ export default function ReportsPage() {
                       <XAxis dataKey="month" />
                       <YAxis />
                       <ChartTooltip content={<ChartTooltipContent />} />
-                      <Line type="monotone" dataKey="documents" stroke="hsl(var(--chart-1))" strokeWidth={2} />
-                      <Line type="monotone" dataKey="searches" stroke="hsl(var(--chart-2))" strokeWidth={2} />
-                      <Line type="monotone" dataKey="users" stroke="hsl(var(--chart-3))" strokeWidth={2} />
+                      <Line type="monotone" dataKey="documents" stroke="#E3C22D" strokeWidth={2} fill="#E3C22D"/>
+                      <Line type="monotone" dataKey="searches" stroke="#2DACE3" strokeWidth={2} fill="#2DACE3"/>
+                      <Line type="monotone" dataKey="users" stroke="#E34E2D" strokeWidth={2} fill="#E34E2D"/>
                     </LineChart>
                   </ResponsiveContainer>
                 </ChartContainer>
@@ -228,7 +228,7 @@ export default function ReportsPage() {
                       label: "เอกสาร",
                     },
                   }}
-                  className="h-[300px]"
+                  className="h-[300px] w-full"
                 >
                   <ResponsiveContainer width="100%" height="100%">
                     <PieChart>
@@ -285,7 +285,7 @@ export default function ReportsPage() {
                     format: "Word",
                   },
                 ].map((report, index) => (
-                  <div key={index} className="flex items-center justify-between p-4 border rounded-lg">
+                  <div key={index} className="flex items-center justify-between p-4 border rounded-lg shadow-sm hover:shadow-md duration-200 ease-in-out">
                     <div className="flex items-center gap-3">
                       <FileText className="h-8 w-8 text-blue-500" />
                       <div>

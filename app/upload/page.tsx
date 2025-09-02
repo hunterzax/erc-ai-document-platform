@@ -413,7 +413,7 @@ export default function UploadPage() {
           <div className="grid grid-cols-4 gap-6 h-[600px]">
 
             {/* Top-Left: Drop files here + Progress */}
-            <Card className="flex flex-col-2 col-span-3 bg-white">
+            <Card className="flex flex-col-2 col-span-3">
               <CardHeader>
                 <CardTitle>อัปโหลดเอกสาร</CardTitle>
                 <CardDescription>รองรับไฟล์ PDF, Word, และรูปภาพ</CardDescription>
@@ -456,7 +456,7 @@ export default function UploadPage() {
             </Card>
 
             {/* Top-Right: Document Detail */}
-            <Card className="flex flex-col col-span-1 bg-white">
+            <Card className="flex flex-col col-span-1">
               <CardHeader>
                 <CardTitle>Document Detail</CardTitle>
                 <CardDescription>ข้อมูลเอกสาร</CardDescription>
@@ -525,7 +525,7 @@ export default function UploadPage() {
             </Card>
 
             {/* Bottom-Left: Picture Display */}
-            <Card className="flex flex-col col-span-2 bg-white">
+            <Card className="flex flex-col col-span-2">
               <CardHeader>
                 <CardTitle>Picture</CardTitle>
                 <CardDescription>ภาพที่อัพโหลด</CardDescription>
@@ -595,7 +595,7 @@ export default function UploadPage() {
             </Card>
 
             {/* Bottom-Right: OCR Detail + Advanced Extraction */}
-            <Card className="flex flex-col col-span-2 bg-white">
+            <Card className="flex flex-col col-span-2">
               <CardHeader>
                 <CardTitle>OCR Detail</CardTitle>
                 <CardDescription>
