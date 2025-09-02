@@ -26,8 +26,6 @@ import { useToast } from "@/hooks/use-toast"
 import { AppHeader } from "@/components/header-bar"
 import PdfViewer from "@/components/ui/pdfviewer"
 import axios from "axios"
-import { mock_data_ocr_1, mock_data_ocr_2 } from "./mockDataK"
-import { AIConfigModal } from "@/components/byk/ai_setting_btn"
 interface ImageItem {
   source: string;
   typhoon_ocr: string;
@@ -36,7 +34,6 @@ interface ImageItem {
 interface ImageWithHex {
   hex: string; // หรือ base64 string
   typhoon_ocr: string;
-  file_name: string;
 }
 
 
@@ -121,7 +118,6 @@ export default function UploadPage() {
   const [loading, setLoading] = useState(false);
   const [selected, setSelected] = useState<ImageWithHex | null>(null);
   const [selectedImg, setSelectedImg] = useState<any>(null);
-  const [loadedImages, setLoadedImages] = useState<number>(0); // 0 นับจำนวนภาพที่โหลดแล้ว
 
 
   // #region processFile
@@ -149,8 +145,6 @@ export default function UploadPage() {
 
       const postOCR = await axios.request(config);
       if (postOCR?.status == 200) {
-        setLoading(true); // ของ image show
-
         // const newFile: any = {
         //   status: "completed",
         //   progress: 100,
@@ -162,6 +156,7 @@ export default function UploadPage() {
         //   name: file?.name,
         //   type: file?.type
         // }
+
 
 
         setTimeout(async () => {
@@ -203,6 +198,7 @@ export default function UploadPage() {
             ]
           }
 
+          setLoading(true); // ของ image show
 
           // step 4 เอาภาพแต่ละเพจ
           // const results: ImageWithHex[] = [];
@@ -224,7 +220,7 @@ export default function UploadPage() {
 
               // ${tokenURL}/raw_docs_files_images/${pageName}
               // setImagesWithHex((prev: any) => [...prev, { hex: hex?.data, typhoon_ocr: img.typhoon_ocr }]);
-              setImagesWithHex((prev: any) => [...prev, { hex: `${tokenURL}/raw_docs_files_images/${img.source}`, typhoon_ocr: img.typhoon_ocr, file_name: img.source }]);
+              setImagesWithHex((prev: any) => [...prev, { hex: `${tokenURL}/raw_docs_files_images/${img.source}`, typhoon_ocr: img.typhoon_ocr }]);
             } catch (err) {
               console.error("Failed to fetch image:", img.source, err);
             }
@@ -318,31 +314,17 @@ export default function UploadPage() {
     }
   }
 
-  // #region โหลดดิ้งแบบเหลี่ยมจัด
-  useEffect(() => {
-    const loadImages = async () => {
-      for (let i = 0; i < imagesWithHex.length; i++) {
-        // เพิ่ม delay 1 วิ
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-        setLoadedImages(i + 1); // อัพเดท state ทีละภาพ
-      }
-    };
-
-    loadImages();
-  }, [imagesWithHex]);
-
-
   useEffect(() => {
     console.log('imagesWithHex', imagesWithHex)
   }, [imagesWithHex])
+
+
 
   useEffect(() => {
     console.log('selected', selected)
   }, [selected])
 
-  useEffect(() => {
-    console.log('loading', loading)
-  }, [loading])
+
 
   // ฟังก์ชันหาขนาดภาพบน client-side
   const getImageDimensions = (file: File): Promise<{ width: number, height: number, aspectRatio: number }> => {
@@ -573,18 +555,18 @@ export default function UploadPage() {
 
         <div className="flex flex-1 flex-col gap-6 p-4">
           {/* 2x2 Grid Layout */}
-          <div className="grid grid-cols-4 gap-6 anifade">
+          <div className="grid grid-cols-4 gap-6 h-[600px]">
 
             {/* Top-Left: Drop files here + Progress */}
-            <Card className="flex flex-col-2 col-span-3">
+            <Card className="flex flex-col-2 col-span-3 bg-white">
               <CardHeader>
                 <CardTitle>อัปโหลดเอกสาร</CardTitle>
                 <CardDescription>รองรับไฟล์ PDF, Word, และรูปภาพ</CardDescription>
               </CardHeader>
-              <CardContent className="grid grid-cols-3 gap-5">
+              <CardContent className="flex-1 flex flex-col">
                 <div
                   {...getRootProps()}
-                  className={`col-span-2 border border-dashed rounded-lg p-6 text-center cursor-pointer transition-colors flex-1 flex flex-col items-center justify-center hover:bg-blue-200/30 ${isDragActive ? "border-primary bg-primary/5" : "border-muted-foreground/25 hover:border-primary/50"
+                  className={`border border-dashed rounded-lg p-6 text-center cursor-pointer transition-colors flex-1 flex flex-col items-center justify-center hover:bg-blue-200/30 ${isDragActive ? "border-primary bg-primary/5" : "border-muted-foreground/25 hover:border-primary/50"
                     }`}
                 >
                   <input {...getInputProps()} />
@@ -615,14 +597,11 @@ export default function UploadPage() {
                     </div>
                   )}
                 </div>
-                <div>
-                  <AIConfigModal mode='form'/>
-                </div>
               </CardContent>
             </Card>
 
             {/* Top-Right: Document Detail */}
-            <Card className="flex flex-col col-span-1">
+            <Card className="flex flex-col col-span-1 bg-white">
               <CardHeader>
                 <CardTitle>Document Detail</CardTitle>
                 <CardDescription>ข้อมูลเอกสาร</CardDescription>
@@ -935,50 +914,23 @@ export default function UploadPage() {
 
 
 
-            {/* 3 working */}
-            <Card className={`flex flex-col col-span-4 bg-white min-h-[320px] h-auto ${imagesWithHex?.length > 0 && 'h-[800px]'} overflow-y-auto`}>
-              {/* <Card className={`flex flex-col col-span-4 bg-white min-h-[320px] h-[800px] ${imagesWithHex?.length > 0 && 'h-[800px]'} overflow-y-auto`}> */}
+            {/* 3 */}
+            <Card className="flex flex-col col-span-4 bg-white h-[800px]">
               <CardHeader>
                 <CardTitle>OCR Image Details</CardTitle>
-                <CardDescription>ผลลัพธ์จาก AI OCR</CardDescription>
+                <CardDescription>ผลลัพธ์จาก OCR</CardDescription>
               </CardHeader>
 
               <CardContent className="flex-1 overflow-auto p-2 space-y-6">
-                {/* {loading && <div>Loading images...</div>} */}
-                {loading && (
-                  <div className="flex flex-col items-center justify-center py-10 space-y-4">
-                    {/* Spinner */}
-                    <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                {loading && <div>Loading images...</div>}
 
-                    {/* Loading text */}
-                    <p className="text-gray-600 text-sm font-medium animate-pulse">
-                      กำลังโหลดรูปภาพ OCR ...
-                    </p>
-                  </div>
-                )
-                }
-
-                {
-                  !loading && imagesWithHex.length <= 0 &&
-                  <div className="flex-1 flex items-center justify-center text-muted-foreground">
-                    <div className="text-center">
-                      <FileText className="mx-auto h-16 w-16 mb-4 opacity-50" />
-                      <p>เลือกไฟล์เพื่อดูผลลัพธ์ OCR</p>
-                    </div>
-                  </div>
-                }
-
-
-
-
-                {imagesWithHex.map((img, idx) => (
-                  // {mock_data_ocr_2.map((img, idx) => (
+                {!loading && imagesWithHex.map((img, idx) => (
                   <div
                     key={idx}
                     className="flex flex-col border rounded shadow-sm overflow-hidden cursor-pointer hover:shadow-md transition"
                   >
                     {/* Page number */}
-                    <div className="bg-gray-100 px-4 py-1 text-sm text-gray-700 font-medium text-[20px]">
+                    <div className="bg-gray-100 px-4 py-1 text-sm text-gray-700 font-medium">
                       Page {idx + 1}
                     </div>
 
@@ -987,75 +939,35 @@ export default function UploadPage() {
                       {/* Left: PDF image */}
                       <div
                         className="w-1/2 bg-gray-100 flex justify-center items-center p-2 cursor-zoom-in"
-                        onClick={() => setSelectedImg(img.hex)}
+                        onClick={() => setSelectedImg(img.hex)} // เก็บเฉพาะ hex สำหรับ modal
                       >
-                        {idx < loadedImages ? (
-                          <img
-                            src={img.hex}
-                            alt={`page-${idx}`}
-                            className="max-h-full max-w-full object-contain"
-                          />
-                        ) : (
-                          // Loading animation
-                          // <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
-                          <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-                        )}
+                        <img
+                          src={img.hex}
+                          alt={`page-${idx}`}
+                          className="max-h-full max-w-full object-contain"
+                        />
                       </div>
 
                       {/* Right: OCR text */}
                       <div className="w-1/2 p-4 overflow-auto bg-white flex flex-col">
-                        {idx < loadedImages ? (<>
-                          <pre
-                            className="whitespace-pre-wrap break-words pb-2"
-                            style={{ fontSize: "0.80rem", lineHeight: "1.1rem" }}
-                          >
-                            {img.typhoon_ocr}
-                          </pre>
-
-                          {/* <div className="w-full bg-blue-400">
-                            <span className="w-full p-2 text-[14px] font-light"> ข้อมูลเอกสาร | จำนวนตัวอักษร: {img.typhoon_ocr.length} | ชื่อไฟล์: {img.file_name} </span>
-                          </div> */}
-
-                          <div className="w-full bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg">
-                            <div className="flex items-center justify-between px-4 py-2 text-sm">
-                              {/* Left */}
-                              <div className="flex items-center space-x-4">
-                                <span className="flex items-center space-x-1">
-                                  <span className="font-semibold">📑 ข้อมูลเอกสาร</span>
-                                </span>
-                                <span className="flex items-center space-x-1">
-                                  <span className="opacity-80">✍️ ตัวอักษร:</span>
-                                  <span className="font-medium">{img.typhoon_ocr.length}</span>
-                                </span>
-                              </div>
-
-                              {/* Right */}
-                              <div className="flex items-center space-x-1">
-                                <span className="opacity-80">📂 ไฟล์:</span>
-                                <span className="font-medium truncate max-w-[200px]">{img.file_name}</span>
-                              </div>
-                            </div>
-                          </div>
-
-                        </>
-                        ) : (
-                          <div className="animate-pulse h-full w-full bg-gray-200 rounded"></div>
-                        )}
+                        <pre
+                          className="whitespace-pre-wrap break-words"
+                          style={{
+                            fontSize: '0.80rem', // ย่อข้อความให้พอดีกับภาพ
+                            lineHeight: '1.1rem',
+                          }}
+                        >
+                          {img.typhoon_ocr}
+                        </pre>
                       </div>
                     </div>
                   </div>
                 ))}
-
-
-
-
-
-
               </CardContent>
 
               {/* Modal แสดงเฉพาะรูปใหญ่ */}
               {selectedImg && (
-                <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50 p-4">
+                <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4">
                   <div className="relative bg-white rounded shadow-lg max-w-[90%] max-h-[90%] overflow-y-auto">
                     <img
                       src={selectedImg}
@@ -1063,7 +975,7 @@ export default function UploadPage() {
                       className="max-w-full max-h-full object-contain"
                     />
                     <button
-                      className="absolute top-2 right-2 px-3 py-1 bg-gray-400 text-white rounded"
+                      className="absolute top-2 right-2 px-3 py-1 bg-red-500 text-white rounded"
                       onClick={() => setSelectedImg(null)}
                     >
                       Close
@@ -1083,6 +995,362 @@ export default function UploadPage() {
 
 
 
+
+
+
+
+
+
+
+            {/* ของอิง */}
+            {/* Bottom-Left: Picture Display */}
+            <Card className="flex flex-col col-span-2 bg-white">
+              <CardHeader>
+                <CardTitle>Picture</CardTitle>
+                <CardDescription>ภาพที่อัพโหลด</CardDescription>
+              </CardHeader>
+              <CardContent className="flex-1 flex flex-col">
+                <div className="overflow-y-auto max-h-screen custom-scroll">
+                  <PdfViewer pdfUrl={selectedFile ? selectedFile.fileUrl : ''} />
+                </div>
+                {/* {selectedFile && selectedFile.fileUrl && selectedFile.type.startsWith("image/") ? (
+                  <div className="flex-1 flex items-center justify-center">
+                    <img
+                      src={selectedFile.fileUrl}
+                      alt={selectedFile.name}
+                      className="max-w-full max-h-full object-contain rounded-lg border"
+                    />
+                  </div>
+                ) : selectedFile && selectedFile.fileUrl && selectedFile.type === "application/pdf" ? (
+                  <div className="flex-1 flex items-center justify-center">
+                    <div className="text-center">
+                      <FileDigit className="mx-auto h-16 w-16 mb-4 text-red-500" />
+                      <p className="font-medium">{selectedFile.name}</p>
+                      <p className="text-sm text-muted-foreground">ไฟล์ PDF</p>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex-1 flex items-center justify-center text-muted-foreground">
+                    <div className="text-center">
+                      <ImageIcon className="mx-auto h-16 w-16 mb-4 opacity-50" />
+                      <p>เลือกไฟล์เพื่อดูภาพ</p>
+                    </div>
+                  </div>
+                )} */}
+
+                {/* File List */}
+                {files.length > 0 && (
+                  <div className="mt-4">
+                    <Label className="text-sm font-medium mb-2 block">ไฟล์ที่อัพโหลด</Label>
+                    <div className="space-y-2 max-h-32 overflow-y-auto">
+                      {files.map((file) => (
+                        <div
+                          key={file.id}
+                          className={`flex items-center gap-2 p-2 border rounded cursor-pointer transition-colors ${selectedFile?.id === file.id
+                            ? "border-primary bg-primary/5"
+                            : "border-muted-foreground/25 hover:border-primary/25"
+                            }`}
+                          onClick={() => setSelectedFile(file)}
+                        >
+                          {getFileIcon(file.type)}
+                          <span className="text-xs truncate flex-1">{file.name}</span>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              removeFile(file.id)
+                            }}
+                            className="h-6 w-6 p-0"
+                          >
+                            <X className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+
+
+
+
+
+
+            {/* ของอิง */}
+            {/* Bottom-Right: OCR Detail + Advanced Extraction */}
+            <Card className="flex flex-col col-span-2 bg-white">
+              <CardHeader>
+                <CardTitle>OCR Detail</CardTitle>
+                <CardDescription>
+                  {selectedFile
+                    ? `ผลลัพธ์จาก: ${selectedFile.name}`
+                    : "เลือกไฟล์เพื่อดูผลลัพธ์ OCR"
+                  }
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="flex-1 flex flex-col">
+                {selectedFile ? (
+                  <div className="flex-1 flex flex-col space-y-4">
+                    {/* Advanced Extraction Controls */}
+                    {(selectedFile.type.startsWith("image/") || selectedFile.type === "application/pdf") && (
+                      <div className="space-y-3">
+                        <div className="flex items-center justify-between">
+                          <Label className="text-sm font-medium">การสกัดข้อมูลขั้นสูง</Label>
+
+                          {/* ปิดไว้ก่อน */}
+                          {/* <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setShowAdvancedParams(!showAdvancedParams)}
+                            className="h-6 px-2"
+                          >
+                            <Settings className="h-3 w-3 mr-1" />
+                            {showAdvancedParams ? "ซ่อน" : "ตั้งค่า"}
+                          </Button> */}
+                        </div>
+
+                        <div className="flex gap-2 h-full">
+                          <Select value={extractionType} onValueChange={setExtractionType}>
+                            <SelectTrigger className="w-40 border border-[#dedede]">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="all">ทั้งหมด</SelectItem>
+                              <SelectItem value="text">ข้อความ</SelectItem>
+                              <SelectItem value="tables">ตาราง</SelectItem>
+                              <SelectItem value="forms">ฟอร์ม</SelectItem>
+                              <SelectItem value="objects">Object</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => extractAdvancedData(selectedFile)}
+                            disabled={isExtracting}
+                            className="flex-1 h-[36px] p-2"
+                          >
+                            {isExtracting ? (
+                              <Clock className="h-3 w-3 mr-1 animate-spin" />
+                            ) : (
+                              <Search className="h-3 w-3 mr-1" />
+                            )}
+                            {isExtracting ? "กำลังสกัด..." : "สกัดข้อมูล"}
+                          </Button>
+                        </div>
+
+                        {/* Advanced Parameters */}
+                        {showAdvancedParams && (
+                          <div className="space-y-2 p-3 border rounded-lg bg-muted/30">
+                            <Label className="text-xs font-medium">พารามิเตอร์ขั้นสูง</Label>
+                            <div className="grid grid-cols-2 gap-2 text-xs">
+                              <div>
+                                <Label className="text-xs">Model</Label>
+                                <Input
+                                  value={extractionParams.model}
+                                  onChange={(e) => setExtractionParams(prev => ({ ...prev, model: e.target.value }))}
+                                  className="h-6 text-xs"
+                                />
+                              </div>
+                              <div>
+                                <Label className="text-xs">Max Tokens</Label>
+                                <Input
+                                  type="number"
+                                  value={extractionParams.max_tokens}
+                                  onChange={(e) => setExtractionParams(prev => ({ ...prev, max_tokens: parseInt(e.target.value) }))}
+                                  className="h-6 text-xs"
+                                />
+                              </div>
+                              <div>
+                                <Label className="text-xs">Temperature</Label>
+                                <Input
+                                  type="number"
+                                  step="0.1"
+                                  value={extractionParams.temperature}
+                                  onChange={(e) => setExtractionParams(prev => ({ ...prev, temperature: parseFloat(e.target.value) }))}
+                                  className="h-6 text-xs"
+                                />
+                              </div>
+                              <div>
+                                <Label className="text-xs">Top P</Label>
+                                <Input
+                                  type="number"
+                                  step="0.1"
+                                  value={extractionParams.top_p}
+                                  onChange={(e) => setExtractionParams(prev => ({ ...prev, top_p: parseFloat(e.target.value) }))}
+                                  className="h-6 text-xs"
+                                />
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {/* OCR Results */}
+                    {selectedFile.extractedText && (
+                      <div className="flex-1 flex flex-col">
+                        <div className="flex items-center justify-between mb-2">
+                          <Label className="text-sm font-medium">ข้อความที่แยกได้</Label>
+                          <div className="flex gap-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              disabled={selectedFile?.extractedText == 'ไม่สามารถแยกข้อความได้' ? true : false}
+                              onClick={() => copyToClipboard(selectedFile.extractedText!)}
+                            >
+                              <Copy className="h-3 w-3 mr-1" />
+                              คัดลอก
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => {
+                                const blob = new Blob([selectedFile.extractedText!], { type: 'text/plain' })
+                                const url = URL.createObjectURL(blob)
+                                const a = document.createElement('a')
+                                a.href = url
+                                a.download = `${selectedFile.name}_ocr.txt`
+                                a.click()
+                                URL.revokeObjectURL(url)
+                              }}
+                              disabled={selectedFile?.extractedText == 'ไม่สามารถแยกข้อความได้' ? true : false}
+                            >
+                              <Download className="h-3 w-3 mr-1" />
+                              ดาวน์โหลด
+                            </Button>
+                          </div>
+                        </div>
+                        <div className="flex-1 border rounded-lg p-3 bg-muted/30 overflow-y-auto">
+                          <pre className="whitespace-pre-wrap text-xs font-mono">
+                            {selectedFile.extractedText}
+                          </pre>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Advanced Extraction Results */}
+                    {selectedFile.extractionResults && (
+                      <div className="space-y-3">
+                        <Label className="text-sm font-medium">ผลการสกัดข้อมูลขั้นสูง</Label>
+
+                        {/* Tables */}
+                        {selectedFile.extractionResults.tables && (
+                          <div className="space-y-2">
+                            <div className="flex items-center gap-2">
+                              <Table className="h-4 w-4 text-blue-500" />
+                              <span className="text-xs font-medium">ตารางที่พบ: {selectedFile.extractionResults.tables.tableCount || 0}</span>
+                            </div>
+                            {selectedFile.extractionResults.tables.tables?.map((table: any, index: number) => (
+                              <div key={index} className="text-xs p-2 bg-blue-50 rounded border">
+                                <div className="font-medium">ตาราง {index + 1}</div>
+                                <div className="text-muted-foreground">ประเภท: {table.type}</div>
+                                <div className="text-muted-foreground">ความแม่นยำ: {Math.round(table.confidence * 100)}%</div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+
+                        {/* Forms */}
+                        {selectedFile.extractionResults.forms && (
+                          <div className="space-y-2">
+                            <div className="flex items-center gap-2">
+                              <FormInput className="h-4 w-4 text-green-500" />
+                              <span className="text-xs font-medium">ฟอร์มที่พบ: {selectedFile.extractionResults.forms.formCount || 0}</span>
+                            </div>
+                            {selectedFile.extractionResults.forms.fields?.map((field: any, index: number) => (
+                              <div key={index} className="text-xs p-2 bg-green-50 rounded border">
+                                <div className="font-medium">{field.label}</div>
+                                <div className="text-muted-foreground">{field.value}</div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+
+                        {/* Objects */}
+                        {selectedFile.extractionResults.objects && (
+                          <div className="space-y-2">
+                            <div className="flex items-center gap-2">
+                              <Eye className="h-4 w-4 text-purple-500" />
+                              <span className="text-xs font-medium">Object ที่พบ: {selectedFile.extractionResults.objects.objectCount || 0}</span>
+                            </div>
+                            {selectedFile.extractionResults.objects.objects?.map((obj: any, index: number) => (
+                              <div key={index} className="text-xs p-2 bg-purple-50 rounded border">
+                                <div className="font-medium">{obj.type}</div>
+                                <div className="text-muted-foreground">ความแม่นยำ: {Math.round(obj.confidence * 100)}%</div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+
+                        {/* Metadata */}
+                        {selectedFile.extractionResults.metadata && (
+                          <div className="space-y-2">
+                            <Label className="text-xs font-medium">ข้อมูลเพิ่มเติม</Label>
+                            <div className="text-xs p-2 bg-gray-50 rounded border">
+                              <div>ขนาด: {selectedFile.extractionResults.metadata.dimensions?.width || 0} x {selectedFile.extractionResults.metadata.dimensions?.height || 0}</div>
+                              <div>อัตราส่วน: {selectedFile.extractionResults.metadata.dimensions?.aspectRatio?.toFixed(2) || 0}</div>
+                              {selectedFile.extractionResults.metadata.pageCount && (
+                                <div>จำนวนหน้า: {selectedFile.extractionResults.metadata.pageCount}</div>
+                              )}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {/* OCR Metadata */}
+                    {selectedFile.ocrResult && (
+                      <div className="space-y-2">
+                        <Label className="text-sm font-medium">ข้อมูลเพิ่มเติม</Label>
+                        <div className="border rounded-lg p-3 bg-muted/30">
+                          <div className="grid grid-cols-2 gap-2 text-xs">
+                            <div>
+                              <span className="font-medium">ภาษา:</span>
+                              <span className="ml-1">{selectedFile.ocrResult.language || 'ไม่ระบุ'}</span>
+                            </div>
+                            <div>
+                              <span className="font-medium">ความแม่นยำ:</span>
+                              <span className="ml-1">{selectedFile.ocrResult.confidence || 'ไม่ระบุ'}</span>
+                            </div>
+                            <div>
+                              <span className="font-medium">จำนวนคำ:</span>
+                              <span className="ml-1">{selectedFile.extractedText?.split(/\s+/).length || 0}</span>
+                            </div>
+                            <div>
+                              <span className="font-medium">ขนาดไฟล์:</span>
+                              <span className="ml-1">{formatFileSize(selectedFile.size)}</span>
+                            </div>
+                            {/* แสดงขนาดภาพถ้ามี */}
+                            {selectedFile.dimensions && selectedFile.dimensions.width > 0 && (
+                              <>
+                                <div>
+                                  <span className="font-medium">ขนาดภาพ:</span>
+                                  <span className="ml-1">{selectedFile.dimensions.width} x {selectedFile.dimensions.height}</span>
+                                </div>
+                                <div>
+                                  <span className="font-medium">อัตราส่วน:</span>
+                                  <span className="ml-1">{selectedFile.dimensions.aspectRatio.toFixed(2)}</span>
+                                </div>
+                              </>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div className="flex-1 flex items-center justify-center text-muted-foreground">
+                    <div className="text-center">
+                      <FileText className="mx-auto h-16 w-16 mb-4 opacity-50" />
+                      <p>เลือกไฟล์เพื่อดูผลลัพธ์ OCR</p>
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
 
 
 
