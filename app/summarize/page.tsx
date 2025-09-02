@@ -45,7 +45,7 @@ export default function SummarizePage() {
       <SidebarInset>
         <AppHeader title={'สรุปด้วย AI'}/>
 
-        <div className="flex flex-1 flex-col gap-6 p-4">
+        <div className="flex flex-1 flex-col gap-6 p-4 anifade">
           <div className="grid gap-6 lg:grid-cols-2">
             {/* Input Section */}
             <Card>
@@ -61,14 +61,14 @@ export default function SummarizePage() {
                   placeholder="วางข้อความเอกสารที่ต้องการสรุปที่นี่..."
                   value={inputText}
                   onChange={(e) => setInputText(e.target.value)}
-                  className="min-h-[300px]"
+                  className="min-h-[300px] border border-[#dedede] placeholder:opacity-40"
                 />
 
                 <div className="flex items-center gap-4">
                   <div className="space-y-2">
                     <label className="text-sm font-medium">ประเภทการสรุป</label>
                     <Select value={summaryType} onValueChange={setSummaryType}>
-                      <SelectTrigger className="w-40">
+                      <SelectTrigger className="w-40 border border-[#dedede]">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>

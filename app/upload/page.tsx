@@ -573,7 +573,7 @@ export default function UploadPage() {
 
         <div className="flex flex-1 flex-col gap-6 p-4">
           {/* 2x2 Grid Layout */}
-          <div className="grid grid-cols-4 gap-6 h-[600px]">
+          <div className="grid grid-cols-4 gap-6 anifade">
 
             {/* Top-Left: Drop files here + Progress */}
             <Card className="flex flex-col-2 col-span-3">
