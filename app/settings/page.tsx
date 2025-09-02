@@ -26,8 +26,18 @@ import { AppHeader } from "@/components/header-bar"
 
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { AIConfigModal } from "@/components/byk/ai_setting_btn"
 
 export default function SettingsPage() {
+
+
+  // สร้างปุ่มกดและ modal configuration AI 
+  // มีให้กำหนด parameter ดังนี้
+  // 1. max token
+  // 2. temperature
+  // 3. Top-P
+  // 4. Top-K
+  // 5. Repetition Penalty
 
   const select_style = 'w-[130px] bg-white rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500'
   const switch_style = "data-[state=checked]:bg-blue-500 data-[state=unchecked]:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:data-[state=checked]:bg-blue-300 disabled:data-[state=unchecked]:bg-gray-200"
@@ -113,7 +123,6 @@ export default function SettingsPage() {
     })
   }
 
-
   return (
     <SidebarProvider>
       <AppSidebar />
@@ -124,7 +133,7 @@ export default function SettingsPage() {
           <Tabs defaultValue="system" className="space-y-6">
             <ToastContainer />
 
-
+            <AIConfigModal />
             {/* <TabsList className="grid w-full grid-cols-5">
               <TabsTrigger value="system">ระบบ</TabsTrigger>
               <TabsTrigger value="security">ความปลอดภัย</TabsTrigger>
@@ -203,14 +212,6 @@ export default function SettingsPage() {
                   <div className="grid gap-6 md:grid-cols-2">
                     <div className="space-y-2">
                       <Label htmlFor="ocr-threshold">เกณฑ์ความแม่นยำ OCR (%)</Label>
-                      {/* <Input
-                        id="ocr-threshold"
-                        type="number"
-                        min="80"
-                        max="100"
-                        value={ocrAccuracyThreshold}
-                        onChange={(e) => setOcrAccuracyThreshold(e.target.value)}
-                      /> */}
                       <Input
                         id="ocr-threshold"
                         type="number"
@@ -262,9 +263,19 @@ export default function SettingsPage() {
                           <SelectItem value="en">English</SelectItem>
                         </SelectContent>
                       </Select>
+                    </div>
 
+                    <div className="flex items-center justify-between">
+                      <div className="space-y-0.5">
+                        <Label className="text-sm font-medium">การเชื่อมต่อ DMS</Label>
+                        <p className="text-xs text-muted-foreground">ตัดการเชื่อมต่อ API</p>
+                      </div>
+                      <Switch className={switch_style} checked={enableAutoBackup} onCheckedChange={setEnableAutoBackup} />
                     </div>
                   </div>
+
+
+
 
                   <div className="space-y-4">
                     <h4 className="text-sm font-medium">
@@ -273,45 +284,62 @@ export default function SettingsPage() {
                       </div>
                     </h4>
 
-                    <div className="space-y-2">
-                      <Label htmlFor="ai-model">โมเดล AI สำหรับสรุป</Label>
-                      {/* <Select defaultValue="gpt-4">
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="gpt-4">GPT-4</SelectItem>
-                          <SelectItem value="gpt-3.5">GPT-3.5 Turbo</SelectItem>
-                          <SelectItem value="claude">Claude</SelectItem>
-                        </SelectContent>
-                      </Select> */}
+                    <div className="grid gap-6 md:grid-cols-2">
 
-                      <Select defaultValue="gpt-4">
-                        <SelectTrigger className="w-[50%] bg-white rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                          <SelectValue placeholder="เลือกโมเดล" />
-                        </SelectTrigger>
-                        <SelectContent className="rounded-lg shadow-md">
-                          <SelectItem value="gpt-4">GPT-4</SelectItem>
-                          <SelectItem value="gpt-3.5">GPT-3.5 Turbo</SelectItem>
-                          <SelectItem value="claude">Claude</SelectItem>
-                        </SelectContent>
-                      </Select>
+                      <div className="space-y-2">
+                        <Label htmlFor="ai-model">โมเดล AI สำหรับสรุป</Label>
+                        <Select defaultValue="gpt-4">
+                          <SelectTrigger className="w-[100%] bg-white rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                            <SelectValue placeholder="เลือกโมเดล" />
+                          </SelectTrigger>
+                          <SelectContent className="rounded-lg shadow-md">
+                            <SelectItem value="gpt-4">GPT-4</SelectItem>
+                            <SelectItem value="gpt-3.5">GPT-3.5 Turbo</SelectItem>
+                            <SelectItem value="claude">Claude</SelectItem>
+                          </SelectContent>
+                        </Select>
+
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="chunk-size">ขนาด Chunk สำหรับ Vector DB</Label>
+                        <Select defaultValue="1000">
+                          <SelectTrigger className="w-[100%] bg-white rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent className="rounded-lg shadow-md">
+                            <SelectItem value="500">500 tokens</SelectItem>
+                            <SelectItem value="1000">1000 tokens</SelectItem>
+                            <SelectItem value="1500">1500 tokens</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      {/* <div className="flex items-center justify-between">
+                        <div className="space-y-0.5">
+                          <Label className="text-sm font-medium">การเชื่อมต่อ DMS</Label>
+                          <p className="text-xs text-muted-foreground">ตัดการเชื่อมต่อ API</p>
+                        </div>
+                        <Switch className={switch_style} checked={enableAutoBackup} onCheckedChange={setEnableAutoBackup} />
+                      </div> */}
+
+
+                      {/* <div className="space-y-2">
+                        <Label htmlFor="chunk-size">ตัดการเชื่อมต่อ DMS</Label>
+                        <Select defaultValue="1000">
+                          <SelectTrigger className="w-[100%] bg-white rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent className="rounded-lg shadow-md">
+                            <SelectItem value="500">500 tokens</SelectItem>
+                            <SelectItem value="1000">1000 tokens</SelectItem>
+                            <SelectItem value="1500">1500 tokens</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div> */}
 
                     </div>
 
-                    <div className="space-y-2">
-                      <Label htmlFor="chunk-size">ขนาด Chunk สำหรับ Vector DB</Label>
-                      <Select defaultValue="1000">
-                        <SelectTrigger className="w-[50%] bg-white rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent className="rounded-lg shadow-md">
-                          <SelectItem value="500">500 tokens</SelectItem>
-                          <SelectItem value="1000">1000 tokens</SelectItem>
-                          <SelectItem value="1500">1500 tokens</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
                   </div>
 
 
@@ -505,10 +533,10 @@ export default function SettingsPage() {
                         <Label>การอัปโหลดเอกสารเสร็จสิ้น</Label>
                         <Switch className={switch_style} defaultChecked />
                       </div>
-                      <div className="flex items-center justify-between">
+                      {/* <div className="flex items-center justify-between">
                         <Label>ความแม่นยำ OCR ต่ำ</Label>
                         <Switch className={switch_style} defaultChecked />
-                      </div>
+                      </div> */}
                       <div className="flex items-center justify-between">
                         <Label>ระบบขัดข้อง</Label>
                         <Switch className={switch_style} defaultChecked />
@@ -715,7 +743,7 @@ export default function SettingsPage() {
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
-                    <Server className="h-5 w-5" />
+                    <Server className="h-5 w-5 text-blue-500" />
                     สถานะระบบ
                   </CardTitle>
                   <CardDescription>ตรวจสอบสถานะการทำงานของระบบต่างๆ</CardDescription>

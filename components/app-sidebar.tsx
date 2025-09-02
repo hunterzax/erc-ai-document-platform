@@ -31,6 +31,7 @@ import {
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { NavLink } from 'react-router-dom';
 import { useEffect, useState } from "react"
+import Image from "next/image";
 
 // Navigation items for the AI Document Intelligence Platform
 const data = {
@@ -107,12 +108,22 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             <SidebarMenuButton size="lg" asChild className="hover:!bg-transparent !text-black">
               <div className="p-4">
                 <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 bg-sidebar-primary rounded-lg flex items-center justify-center">
-                    <FileText className="w-4 h-4 text-sidebar-primary-foreground" />
+                  {/* <div className="w-8 h-8 bg-sidebar-primary rounded-lg flex items-center justify-center"> */}
+                  <div className="w-12 h-12 rounded-lg flex items-center justify-center">
+                    {/* <FileText className="w-4 h-4 text-sidebar-primary-foreground" /> */}
+                    <Image
+                      src={`/icon/ERC_logo.png`}
+                      width={200}
+                      height={30}
+                      alt={`/icon/ERC_logo.png`}
+                      priority
+                    />
                   </div>
                   <div className="flex flex-col">
-                    <span className="font-semibold text-sm">AI Document</span>
-                    <span className="text-xs text-muted-foreground">Intelligence Platform</span>
+                    {/* <span className="font-semibold text-sm">AI Document</span>
+                    <span className="text-xs text-muted-foreground">Intelligence Platform</span> */}
+                    <span className="font-semibold text-sm">ศูนย์ข้อมูลพลังงาน</span>
+                    <span className="text-xs text-muted-foreground">AI Intelligence Platform</span>
                   </div>
                 </div>
               </div>

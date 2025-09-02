@@ -249,51 +249,103 @@ export default function UsersPage() {
     <SidebarProvider>
       <AppSidebar />
       <SidebarInset>
-        <AppHeader title={'จัดการผู้ใช้'}/>
+        <AppHeader title={'จัดการผู้ใช้'} />
 
         <div className="flex flex-1 flex-col gap-6 p-4">
+
           {/* User Statistics */}
+          {/* <div className="grid gap-4 md:grid-cols-4">
+            <Card className="bg-white">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 ">
+                <CardTitle className="text-xl font-semibold">ผู้ใช้ทั้งหมด</CardTitle>
+                <Users className="h-7 w-7 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-[40px] font-bold">{users.length}</div>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-white">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0">
+                <CardTitle className="text-xl font-semibold">ผู้ใช้ที่ใช้งาน</CardTitle>
+                <CheckCircle className="h-7 w-7 text-green-500" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-[40px] font-bold">{users.filter((u) => u.status === "active").length}</div>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-white">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0">
+                <CardTitle className="text-xl font-semibold">ผู้ดูแลระบบ</CardTitle>
+                <ShieldCheck className="h-7 w-7 text-red-500" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-[40px] font-bold">{users.filter((u) => u.role === "admin").length}</div>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-white">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0">
+                <CardTitle className="text-xl font-semibold">นักวิเคราะห์</CardTitle>
+                <Shield className="h-7 w-7 text-blue-500" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-[40px] font-bold">{users.filter((u) => u.role === "analyst").length}</div>
+              </CardContent>
+            </Card>
+          </div> */}
+
           <div className="grid gap-4 md:grid-cols-4">
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">ผู้ใช้ทั้งหมด</CardTitle>
-                <Users className="h-4 w-4 text-muted-foreground" />
+            {/** Users Card */}
+            <Card className="bg-white rounded-2xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow duration-200">
+              <CardHeader className="flex items-center justify-between">
+                <CardTitle className="text-xl font-semibold text-gray-800">ผู้ใช้ทั้งหมด</CardTitle>
+                <Users className="h-7 w-7 text-blue-500" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{users.length}</div>
+                <div className="text-4xl font-bold text-gray-900">{users.length}</div>
               </CardContent>
             </Card>
 
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">ผู้ใช้ที่ใช้งาน</CardTitle>
-                <CheckCircle className="h-4 w-4 text-green-500" />
+            {/** Active Users Card */}
+            <Card className="bg-white rounded-2xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow duration-200">
+              <CardHeader className="flex items-center justify-between">
+                <CardTitle className="text-xl font-semibold text-gray-800">ผู้ใช้ที่ใช้งาน</CardTitle>
+                <CheckCircle className="h-7 w-7 text-green-500" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{users.filter((u) => u.status === "active").length}</div>
+                <div className="text-4xl font-bold text-gray-900">{users.filter((u) => u.status === "active").length}</div>
               </CardContent>
             </Card>
 
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">ผู้ดูแลระบบ</CardTitle>
-                <ShieldCheck className="h-4 w-4 text-red-500" />
+            {/** Admin Card */}
+            <Card className="bg-white rounded-2xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow duration-200">
+              <CardHeader className="flex items-center justify-between">
+                <CardTitle className="text-xl font-semibold text-gray-800">ผู้ดูแลระบบ</CardTitle>
+                <ShieldCheck className="h-7 w-7 text-red-500" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{users.filter((u) => u.role === "admin").length}</div>
+                <div className="text-4xl font-bold text-gray-900">{users.filter((u) => u.role === "admin").length}</div>
               </CardContent>
             </Card>
 
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">นักวิเคราะห์</CardTitle>
-                <Shield className="h-4 w-4 text-blue-500" />
+            {/** Analyst Card */}
+            <Card className="bg-white rounded-2xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow duration-200">
+              <CardHeader className="flex items-center justify-between">
+                <CardTitle className="text-xl font-semibold text-gray-800">นักวิเคราะห์</CardTitle>
+                <Shield className="h-7 w-7 text-blue-500" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{users.filter((u) => u.role === "analyst").length}</div>
+                <div className="text-4xl font-bold text-gray-900">{users.filter((u) => u.role === "analyst").length}</div>
               </CardContent>
             </Card>
           </div>
+
+
+
+
+
 
           {/* User Management */}
           <Card>
@@ -323,6 +375,7 @@ export default function UsersPage() {
                           value={newUser.name}
                           onChange={(e) => setNewUser({ ...newUser, name: e.target.value })}
                           placeholder="นายสมชาย ใจดี"
+                          className="w-full bg-white rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                         />
                       </div>
                       <div className="grid gap-2">
@@ -333,6 +386,7 @@ export default function UsersPage() {
                           value={newUser.email}
                           onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
                           placeholder="somchai@ggp.go.th"
+                          className="w-full bg-white rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                         />
                       </div>
                       <div className="grid gap-2">
@@ -341,10 +395,10 @@ export default function UsersPage() {
                           value={newUser.role}
                           onValueChange={(value: any) => setNewUser({ ...newUser, role: value })}
                         >
-                          <SelectTrigger>
+                          <SelectTrigger className="w-full bg-white rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                             <SelectValue />
                           </SelectTrigger>
-                          <SelectContent>
+                          <SelectContent className="rounded-lg shadow-md">
                             <SelectItem value="viewer">ผู้ดู</SelectItem>
                             <SelectItem value="analyst">นักวิเคราะห์</SelectItem>
                             <SelectItem value="admin">ผู้ดูแลระบบ</SelectItem>
@@ -358,6 +412,7 @@ export default function UsersPage() {
                           value={newUser.department}
                           onChange={(e) => setNewUser({ ...newUser, department: e.target.value })}
                           placeholder="สำนักงานเลขาธิการ"
+                          className="w-full bg-white rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                         />
                       </div>
                     </div>
@@ -380,14 +435,17 @@ export default function UsersPage() {
                     placeholder="ค้นหาผู้ใช้..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-10"
+                    // className="pl-10"
+                    className="w-full bg-white pl-10 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+
                   />
                 </div>
                 <Select value={roleFilter} onValueChange={setRoleFilter}>
-                  <SelectTrigger className="w-40">
+                  {/* <SelectTrigger className="w-40"> */}
+                  <SelectTrigger className="w-40 bg-white rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                     <SelectValue placeholder="บทบาท" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="rounded-lg shadow-md">
                     <SelectItem value="all">ทุกบทบาท</SelectItem>
                     <SelectItem value="admin">ผู้ดูแลระบบ</SelectItem>
                     <SelectItem value="analyst">นักวิเคราะห์</SelectItem>
@@ -395,10 +453,11 @@ export default function UsersPage() {
                   </SelectContent>
                 </Select>
                 <Select value={statusFilter} onValueChange={setStatusFilter}>
-                  <SelectTrigger className="w-40">
+                  {/* <SelectTrigger className="w-40"> */}
+                  <SelectTrigger className="w-40 bg-white rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                     <SelectValue placeholder="สถานะ" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="rounded-lg shadow-md">
                     <SelectItem value="all">ทุกสถานะ</SelectItem>
                     <SelectItem value="active">ใช้งาน</SelectItem>
                     <SelectItem value="inactive">ไม่ใช้งาน</SelectItem>
@@ -408,8 +467,8 @@ export default function UsersPage() {
               </div>
 
               {/* Users Table */}
-              <div className="rounded-md border">
-                <Table>
+              <div className="border rounded-lg">
+                <Table className="bg-white rounded-lg">
                   <TableHeader>
                     <TableRow>
                       <TableHead>ผู้ใช้</TableHead>
@@ -417,7 +476,7 @@ export default function UsersPage() {
                       <TableHead>หน่วยงาน</TableHead>
                       <TableHead>สถานะ</TableHead>
                       <TableHead>เข้าสู่ระบบล่าสุด</TableHead>
-                      <TableHead>จำนวนครั้ง</TableHead>
+                      <TableHead>จำนวนครั้งที่เข้าสู่ระบบ</TableHead>
                       <TableHead className="text-right">การดำเนินการ</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -434,7 +493,7 @@ export default function UsersPage() {
                         <TableCell>{user.department}</TableCell>
                         <TableCell>{getStatusBadge(user.status)}</TableCell>
                         <TableCell className="text-sm">{user.lastLogin}</TableCell>
-                        <TableCell>{user.loginCount}</TableCell>
+                        <TableCell className="text-center">{user.loginCount}</TableCell>
                         <TableCell className="text-right">
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
