@@ -204,7 +204,7 @@ export function ChatHistory({ onSessionSelect, onNewChat, currentSessionId, refr
             {filteredSessions.map((session) => (
               <div
                 key={session.id}
-                className={`group relative p-3 rounded-lg border cursor-pointer transition-colors ${currentSessionId === session.id
+                className={`group relative p-3 rounded-lg border cursor-pointer transition-colors anifade ${currentSessionId === session.id
                   ? 'bg-primary/10 border-primary'
                   : 'hover:bg-muted/50 border-border'
                   }`}

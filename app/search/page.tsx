@@ -121,7 +121,7 @@ export default function SearchPage() {
       <SidebarInset>
         <AppHeader title={'ค้นหาและวิเคราะห์'}/>
 
-        <div className="flex flex-1 flex-col gap-6 p-4">
+        <div className="flex flex-1 flex-col gap-6 p-4 anifade">
           {/* Search Interface */}
           <Card>
             <CardHeader>

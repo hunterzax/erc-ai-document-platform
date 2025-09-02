@@ -41,18 +41,10 @@ export function AIConfigModal({ mode }: any) {
 
     const handleSave = () => {
         if (!validate()) return
-
         // TODO: save config logic
         toast.success("บันทึก Configuration AI เรียบร้อยแล้ว!", {
             position: "bottom-right",
             autoClose: 3000,
-        })
-        console.log({
-            maxToken,
-            temperature,
-            topP,
-            topK,
-            repetitionPenalty,
         })
     }
 
