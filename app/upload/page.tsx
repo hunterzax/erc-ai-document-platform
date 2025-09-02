@@ -565,6 +565,15 @@ export default function UploadPage() {
     }
   }
 
+  useEffect(() => {
+    console.log('files', files)
+  }, [files])
+
+  useEffect(() => {
+    console.log('loading', loading)
+  }, [loading])
+
+
   return (
     <SidebarProvider>
       <AppSidebar />
@@ -607,16 +616,19 @@ export default function UploadPage() {
                         <div key={file.id} className="mb-3">
                           <div className="flex items-center justify-between text-xs mb-1">
                             <span className="truncate">{file.name}</span>
-                            <span className="text-muted-foreground">{file.progress}%</span>
+
+                            {/* <span className="text-muted-foreground">{file.progress}%</span> */}
+                            <span className="text-muted-foreground">{!loading ? 50 : 100}%</span>
                           </div>
-                          <Progress value={file.progress} className="h-2" />
+                          {/* <Progress value={file.progress} className="h-2" /> */}
+                          <Progress value={!loading ? 50 : 100} className="h-2" />
                         </div>
                       ))}
                     </div>
                   )}
                 </div>
                 <div>
-                  <AIConfigModal mode='form'/>
+                  <AIConfigModal mode='form' />
                 </div>
               </CardContent>
             </Card>
