@@ -398,7 +398,7 @@ function ChatContent({
         </div>
         <div className="ml-auto flex items-center gap-2">
           <WebhookStatus onTestMessage={(message) => setPrompt(message)} />
-          <Button
+          {/* <Button
             variant="outline"
             size="sm"
             onClick={handleNewChat}
@@ -406,7 +406,7 @@ function ChatContent({
           >
             <Plus className="h-4 w-4" />
             New Chat
-          </Button>
+          </Button> */}
         </div>
       </header>
 
