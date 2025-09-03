@@ -19,7 +19,7 @@ import { Calendar } from "@/components/ui/calendar"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
 import { BarChart, Bar, ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianGrid, Line, LineChart, Pie, PieChart, Cell } from "recharts"
-import { BarChart3, Download, FileText, CalendarIcon, Plus, Trash2, Search } from "lucide-react"
+import { BarChart3, Download, FileText, CalendarIcon, Plus, Trash2, Search, PlusCircle } from "lucide-react"
 import { useEffect, useState } from "react"
 import { format } from "date-fns"
 import { th } from "date-fns/locale"
@@ -246,12 +246,19 @@ export default function ReportsPage() {
           {/* <EnergyDashboard /> */}
           <Card>
             <CardHeader>
-              <CardTitle>ข้อมูลพลังงาน</CardTitle>
-              <CardDescription>คณะกรรมการกำกับกิจการพลังงาน</CardDescription>
+              <div className="flex justify-between items-center gap-3">
+                <div className="w-full">
+                <CardTitle>ข้อมูลพลังงาน</CardTitle>
+                <CardDescription>คณะกรรมการกำกับกิจการพลังงาน</CardDescription>
+                </div>
+                <div>
+                  <PlusCircle className="hover:text-blue-500 duration-200 ease-in-out cursor-pointer"/>
+                </div>
+              </div>
             </CardHeader>
             <CardContent>
               <div className="space-y-4 w-full">
-                <Dashboard />
+                <Dashboard/>
               </div>
             </CardContent>
           </Card>
