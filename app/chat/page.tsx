@@ -289,7 +289,7 @@ function ChatContent({
         if (error.message.includes('webhook') && error.message.includes('not registered')) {
           errorContent += "The webhook is not registered "
         } else if (error.message.includes('Failed to fetch')) {
-          errorContent += "Cannot connect to n8n. server"
+          errorContent += "Cannot connect to server"
         } else {
           errorContent += error.message
         }
@@ -420,27 +420,23 @@ function ChatContent({
                 <p className="text-sm">Type a message below to begin chatting with AI</p>
                 <div className="flex w-full flex-col space-y-4 items-center pt-5">
                   <div className="flex flex-wrap gap-2 w-[500px] items-center justify-center">
-                    <PromptSuggestion onClick={() => setPrompt("Tell me a joke")}>
-                      ขอเรียกความสนใจ
-                    </PromptSuggestion>
-
-                    <PromptSuggestion onClick={() => setPrompt("How does this work?")}>
-                      สวัสดีครับ
-                    </PromptSuggestion>
-
-                    <PromptSuggestion
-                      onClick={() => setPrompt("สรุปคำพิพากษา คดีพิพาทหมายเลข ๓๔๔/๒๕๖ มาให้หน่อยแบบละเอียด")}
-                    >
+                    <PromptSuggestion onClick={() => setPrompt("สรุปคำพิพากษา คดีพิพาทหมายเลข ๓๔๔/๒๕๖ มาให้หน่อยแบบละเอียด")} className="cursor-pointer">
                       สรุปคำพิพากษา คดีพิพาทหมายเลข ๓๔๔/๒๕๖ มาให้หน่อยแบบละเอียด
                     </PromptSuggestion>
 
-                    <PromptSuggestion onClick={() => setPrompt("Write a poem")}>
-                      Write a poem
+                    <PromptSuggestion onClick={() => setPrompt("บริษัท เคเอส ซี คอมเมอร์เชียล อินเตอร์เนต จำกัด วางบิลไว้เป็นจำนวนเงินเท่าไหร่")} className="cursor-pointer">
+                      บริษัท เคเอส ซี คอมเมอร์เชียล อินเตอร์เนต จำกัด วางบิลไว้เป็นจำนวนเงินเท่าไหร่
                     </PromptSuggestion>
+
                     <PromptSuggestion
-                      onClick={() => setPrompt("Code a React component")}
+                      onClick={() => setPrompt("มติการประชุมคณะกรรมการนโยบายพลังงานแห่งชาติ ครั้งที่ 4/2567 (ครั้งที่ 170) ฝ่ายเลขานุการฯ ได้สรุปสาระสำคัญให้ที่ประชุม ว่าอะไร")}
+                      className="cursor-pointer"
                     >
-                      Code a React component
+                      มติการประชุมคณะกรรมการนโยบายพลังงานแห่งชาติ ครั้งที่ 4/2567 (ครั้งที่ 170) ฝ่ายเลขานุการฯ ได้สรุปสาระสำคัญให้ที่ประชุม ว่าอะไร
+                    </PromptSuggestion>
+
+                    <PromptSuggestion onClick={() => setPrompt("สรุป คดีหมายเลข 44/2566 มาให้หน่อยแบบละเอียด")} className="cursor-pointer">
+                      สรุป คดีหมายเลข 44/2566 มาให้หน่อยแบบละเอียด
                     </PromptSuggestion>
                   </div>
                 </div>
