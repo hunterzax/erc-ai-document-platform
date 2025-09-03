@@ -19,7 +19,7 @@ import { Calendar } from "@/components/ui/calendar"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
 import { BarChart, Bar, ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianGrid, Line, LineChart, Pie, PieChart, Cell } from "recharts"
-import { BarChart3, Download, FileText, CalendarIcon, Plus, Trash2 } from "lucide-react"
+import { BarChart3, Download, FileText, CalendarIcon, Plus, Trash2, Search } from "lucide-react"
 import { useEffect, useState } from "react"
 import { format } from "date-fns"
 import { th } from "date-fns/locale"
@@ -31,6 +31,7 @@ import "react-grid-layout/css/styles.css";
 import "react-resizable/css/styles.css";
 import EnergyDashboard from "./biChart"
 import Dashboard from "./biChart2"
+import { Input } from "@/components/ui/input"
 
 const ResponsiveGridLayout = WidthProvider(Responsive)
 
@@ -249,21 +250,32 @@ export default function ReportsPage() {
               <CardDescription>คณะกรรมการกำกับกิจการพลังงาน</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
+              <div className="space-y-4 w-full">
                 <Dashboard />
               </div>
             </CardContent>
           </Card>
 
-
-
-
-
           {/* Recent Reports */}
           <Card>
             <CardHeader>
-              <CardTitle>รายงานล่าสุด</CardTitle>
-              <CardDescription>รายงานที่สร้างขึ้นล่าสุด</CardDescription>
+              <div className="flex justify-between items-center">
+                <div>
+                  <CardTitle>รายงานล่าสุด</CardTitle>
+                  <CardDescription>รายงานที่สร้างขึ้นล่าสุด</CardDescription>
+                </div>
+                <div className="relative w-lg">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    placeholder="ค้นหาเอกสาร"
+                    // value={searchQuery}
+                    // onChange={(e) => setSearchQuery(e.target.value)}
+                    // onKeyPress={handleKeyPress}
+                    // className="pl-10 border border-[#dedede] placeholder:opacity-40 text-sm"
+                    className="pl-10 w-full bg-white rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 placeholder:opacity-40"
+                  />
+                </div>
+              </div>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
@@ -289,7 +301,7 @@ export default function ReportsPage() {
                     size: "956 KB",
                     format: "Word",
                   },
-                ].map((report, index) => (
+                ]?.map((report, index) => (
                   <div key={index} className="flex items-center justify-between p-4 border rounded-lg shadow-sm hover:shadow-md duration-200 ease-in-out">
                     <div className="flex items-center gap-3">
                       <FileText className="h-8 w-8 text-blue-500" />

@@ -171,7 +171,7 @@ export default function UsersPage() {
     const labels = {
       admin: "ผู้ดูแลระบบ",
       analyst: "นักวิเคราะห์",
-      viewer: "ผู้ดู",
+      viewer: "ผู้ใช้งานทั่วไป",
     }
 
     return (
@@ -399,7 +399,7 @@ export default function UsersPage() {
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent className="rounded-lg shadow-md">
-                            <SelectItem value="viewer">ผู้ดู</SelectItem>
+                            <SelectItem value="viewer">ผู้ใช้งานทั่วไป</SelectItem>
                             <SelectItem value="analyst">นักวิเคราะห์</SelectItem>
                             <SelectItem value="admin">ผู้ดูแลระบบ</SelectItem>
                           </SelectContent>
@@ -576,7 +576,7 @@ export default function UsersPage() {
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="viewer">ผู้ดู</SelectItem>
+                        <SelectItem value="viewer">ผู้ใช้งานทั่วไป</SelectItem>
                         <SelectItem value="analyst">นักวิเคราะห์</SelectItem>
                         <SelectItem value="admin">ผู้ดูแลระบบ</SelectItem>
                       </SelectContent>

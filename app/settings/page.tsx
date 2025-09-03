@@ -53,8 +53,8 @@ export default function SettingsPage() {
     { service: "OCR Engine", status: "online", uptime: "99.8%" },
     { service: "Vector Database", status: "online", uptime: "99.9%" },
     { service: "Search Engine", status: "online", uptime: "99.7%" },
-    { service: "AI Summarization", status: "degraded", uptime: "97.2%" },
-    { service: "File Storage", status: "online", uptime: "99.9%" },
+    { service: "AI Summarization", status: "online", uptime: "99.6%" },
+    { service: "File Storage", status: "degraded", uptime: "93.3%" },
     { service: "Authentication", status: "online", uptime: "100%" },
   ]
 
@@ -283,11 +283,14 @@ export default function SettingsPage() {
 
                   <div className="space-y-2">
                     <Label htmlFor="ai-model">โมเดล AI สำหรับสรุป</Label>
-                    <Select defaultValue="gpt-4">
+                    <Select defaultValue="nxm-7">
                       <SelectTrigger className="w-[100%] bg-white rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                         <SelectValue placeholder="เลือกโมเดล" />
                       </SelectTrigger>
                       <SelectContent className="rounded-lg shadow-md">
+                        <SelectItem value="nxm-3">NX:3b</SelectItem>
+                        <SelectItem value="nxm-5">NX:5b</SelectItem>
+                        <SelectItem value="nxm-7">NX:7b</SelectItem>
                         <SelectItem value="gpt-4">GPT-4</SelectItem>
                         <SelectItem value="gpt-3.5">GPT-3.5 Turbo</SelectItem>
                         <SelectItem value="claude">Claude</SelectItem>
@@ -503,7 +506,7 @@ export default function SettingsPage() {
                 <Bell className="h-5 w-5 text-blue-500" />
                 การแจ้งเตือน
               </CardTitle>
-              <CardDescription  className="text-sm text-gray-500 dark:text-gray-400">
+              <CardDescription className="text-sm text-gray-500 dark:text-gray-400">
                 กำหนดการแจ้งเตือนและการส่งอีเมล
               </CardDescription>
             </CardHeader>
@@ -555,8 +558,8 @@ export default function SettingsPage() {
                 <Input
                   id="admin-email"
                   type="email"
-                  defaultValue="admin@ggp.go.th"
-                  placeholder="admin@ggp.go.th"
+                  defaultValue="admin@erc.go.th"
+                  placeholder="admin@erc.go.th"
                   // className="rounded-lg border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   className="w-full bg-white rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 />
@@ -569,7 +572,7 @@ export default function SettingsPage() {
                 </Label>
                 <Input
                   id="smtp-server"
-                  defaultValue="mail.ggp.go.th"
+                  defaultValue="mail.erc.go.th"
                   // className="rounded-lg border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   className="w-full bg-white rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 />
@@ -926,11 +929,15 @@ export default function SettingsPage() {
 
                         <div className="space-y-2">
                           <Label htmlFor="ai-model">โมเดล AI สำหรับสรุป</Label>
-                          <Select defaultValue="gpt-4">
+                          <Select defaultValue="nxm-erc-7">
                             <SelectTrigger className="w-[100%] bg-white rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                               <SelectValue placeholder="เลือกโมเดล" />
                             </SelectTrigger>
                             <SelectContent className="rounded-lg shadow-md">
+                              <SelectItem value="nxm-3">NX:3b</SelectItem>
+                              <SelectItem value="nxm-5">NX:5b</SelectItem>
+                              <SelectItem value="nxm-7">NX:7b</SelectItem>
+                              <SelectItem value="nxm-erc-7">NX-ERC:7b</SelectItem>
                               <SelectItem value="gpt-4">GPT-4</SelectItem>
                               <SelectItem value="gpt-3.5">GPT-3.5 Turbo</SelectItem>
                               <SelectItem value="claude">Claude</SelectItem>
@@ -1110,8 +1117,8 @@ export default function SettingsPage() {
                       <Input
                         id="admin-email"
                         type="email"
-                        defaultValue="admin@ggp.go.th"
-                        placeholder="admin@ggp.go.th"
+                        defaultValue="admin@erc.go.th"
+                        placeholder="admin@erc.go.th"
                         // className="rounded-lg border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                         className="w-full bg-white rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                       />
@@ -1124,7 +1131,7 @@ export default function SettingsPage() {
                       </Label>
                       <Input
                         id="smtp-server"
-                        defaultValue="mail.ggp.go.th"
+                        defaultValue="mail.erc.go.th"
                         // className="rounded-lg border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                         className="w-full bg-white rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                       />

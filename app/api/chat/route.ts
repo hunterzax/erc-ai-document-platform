@@ -5,7 +5,7 @@ export async function POST(request: NextRequest) {
   try {
     
     const { messages, webhookUrl, systemPrompt } = await request.json()
-    // console.log("--------->"+ messages + '===' + webhookUrl)
+    console.log("--------->"+ messages + '===' + webhookUrl)
     if (!messages || !Array.isArray(messages)) {
       return NextResponse.json(
         { error: 'Messages array is required' },
@@ -14,8 +14,8 @@ export async function POST(request: NextRequest) {
     }
 
     // Get response from n8n webhook
-    const result = await n8nChatCompletion(messages, webhookUrl, systemPrompt)
     console.log("--------->"+ webhookUrl)
+    const result = await n8nChatCompletion(messages, webhookUrl, systemPrompt)
     if (!result.success) {
       return NextResponse.json(
         { error: result.error },

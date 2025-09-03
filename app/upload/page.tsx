@@ -19,7 +19,7 @@ import { Badge } from "@/components/ui/badge"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
 import { Input } from "@/components/ui/input"
-import { Upload, FileText, ImageIcon, X, CheckCircle, AlertCircle, Clock, Download, Copy, Image as ImagexIcon, Table, FormInput, Eye, FileDigit, Settings, CheckCheck, ScanSearch, ListChecks, List, ArrowBigDownDash } from "lucide-react"
+import { Upload, FileText, ImageIcon, X, CheckCircle, AlertCircle, Clock, Download, Copy, Image as ImagexIcon, Table, FormInput, Eye, FileDigit, Settings, CheckCheck, ScanSearch, ListChecks, List, ArrowBigDownDash, Logs } from "lucide-react"
 import { useState, useCallback, useEffect } from "react"
 import { useDropzone } from "react-dropzone"
 import { useToast } from "@/hooks/use-toast"
@@ -541,7 +541,6 @@ export default function UploadPage() {
   const getImageOfPage = async (pageName?: any) => {
     try {
       const res_get_image = await axios.get(`${tokenURL}/raw_docs_files_images/${pageName}`);
-      console.log(">>> res_get_image", res_get_image);
       return res_get_image
     } catch (error: any) {
       if (axios.isAxiosError(error)) {
@@ -728,7 +727,10 @@ export default function UploadPage() {
                dark:data-[state=active]:bg-blue-600 dark:data-[state=active]:text-white"
                 onClick={() => settabmenu("upload")}
               >
-                อัปโหลดเอกสาร
+                <div className="flex gap-2 items-center">
+                  <Upload size={16} />
+                  อัปโหลดเอกสาร
+                </div>
               </TabsTrigger>
 
               <TabsTrigger
@@ -739,7 +741,10 @@ export default function UploadPage() {
                dark:data-[state=active]:bg-blue-600 dark:data-[state=active]:text-white"
                 onClick={() => settabmenu("upload-list")}
               >
-                ข้อมูลเอกสาร
+                <div className="flex gap-2 items-center">
+                  <Logs size={16} />
+                  ข้อมูลรายการเอกสาร
+                </div>
               </TabsTrigger>
             </TabsList>
 
@@ -1081,13 +1086,13 @@ export default function UploadPage() {
                             <div><Eye /></div>
                             <div>{'Extracted Text'}</div>
                           </div>
-                          <div><Copy className=" cursor-pointer" onClick={() => handleCopy(dialogData ? dialogData?.content : '')} /></div>
+                          <div><Copy size={16} className=" cursor-pointer" onClick={() => handleCopy(dialogData ? dialogData?.content : '')} /></div>
                         </div>
                       </div>
                     </div>
                     <div className="grid grid-cols-2 gap-3 h-full pb-2">
                       <div className="overflow-y-auto max-h-screen h-[calc(90vh-240px)] custom-scroll-gray bg-[#292929]">
-                        <PdfViewer pdfUrl={dialogData ? dialogData?.url : ''} />
+                        <PdfViewer key={'pdf-view'} pdfUrl={dialogData ? dialogData?.url : ''} />
                       </div>
 
                       <div>
