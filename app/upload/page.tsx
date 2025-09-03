@@ -19,15 +19,16 @@ import { Badge } from "@/components/ui/badge"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
 import { Input } from "@/components/ui/input"
-import { Upload, FileText, ImageIcon, X, CheckCircle, AlertCircle, Clock, Download, Copy, Search, Table, FormInput, Eye, FileDigit, Settings } from "lucide-react"
+import { Upload, FileText, ImageIcon, X, CheckCircle, AlertCircle, Clock, Download, Copy, Search, Table, FormInput, Eye, FileDigit, Settings, CheckCheck } from "lucide-react"
 import { useState, useCallback, useEffect } from "react"
 import { useDropzone } from "react-dropzone"
 import { useToast } from "@/hooks/use-toast"
+import { toast as toastColor } from "react-toastify"
 import { AppHeader } from "@/components/header-bar"
 import PdfViewer from "@/components/ui/pdfviewer"
 import axios from "axios"
 import { mock_data_ocr_1, mock_data_ocr_2 } from "./mockDataK"
-import { AIConfigModal } from "@/components/byk/ai_setting_btn"
+import AIConfig from "@/components/byk/ai_setting_btn"
 interface ImageItem {
   source: string;
   typhoon_ocr: string;
@@ -122,6 +123,7 @@ export default function UploadPage() {
   const [selected, setSelected] = useState<ImageWithHex | null>(null);
   const [selectedImg, setSelectedImg] = useState<any>(null);
   const [loadedImages, setLoadedImages] = useState<number>(0); // 0 นับจำนวนภาพที่โหลดแล้ว
+  const [successRender, setsuccessRender] = useState(false)
 
 
   // #region processFile
@@ -129,13 +131,19 @@ export default function UploadPage() {
     try {
 
       setisLoading(true);
-
-      console.log(">>> file", file)
-      console.log(">>> originalFile", originalFile)
+      setNumber(0)
 
       let data = new FormData();
+      let option: any = AIOption;
+
       data.append('file', originalFile);
       data.append('tags', 'กฏหมาย,กฏหมายพลังงาน');
+
+      //for setting ai
+      data.append('max_tokens', option?.max_tokens);
+      data.append('temperature', option?.temperature);
+      data.append('top_p', option?.top_p);
+      data.append('repetition_penalty', option?.repetition_penalty);
 
       let config = {
         method: 'post',
@@ -225,6 +233,7 @@ export default function UploadPage() {
               // ${tokenURL}/raw_docs_files_images/${pageName}
               // setImagesWithHex((prev: any) => [...prev, { hex: hex?.data, typhoon_ocr: img.typhoon_ocr }]);
               setImagesWithHex((prev: any) => [...prev, { hex: `${tokenURL}/raw_docs_files_images/${img.source}`, typhoon_ocr: img.typhoon_ocr, file_name: img.source }]);
+              setsuccessRender(true);
             } catch (err) {
               console.error("Failed to fetch image:", img.source, err);
             }
@@ -535,7 +544,6 @@ export default function UploadPage() {
     }
   }
 
-
   // #region step 4
   // step 4
   const getImageOfPage = async (pageName?: any) => {
@@ -573,6 +581,41 @@ export default function UploadPage() {
     console.log('loading', loading)
   }, [loading])
 
+  const [number, setNumber] = useState<any>(null);
+
+  useEffect(() => {
+    if (number == 0) {
+      countWithDelay(setNumber);
+    }
+  }, [number]);
+
+  function countWithDelay(callback: any) {
+    let i = 1;
+    const interval = setInterval(() => {
+      callback(i);
+      if (i === 99) {
+        clearInterval(interval);
+      }
+      i++;
+    }, 2000);
+  }
+
+  const [AIOption, setAIOption] = useState<any>({
+    'max_tokens': 8000,
+    'temperature': 0.0,
+    'top_p': 1.0,
+    'repetition_penalty': 1.0,
+  });
+
+  const settingAI = (result: any) => {
+    setAIOption(result);
+
+    toast({
+      title: "บันทึก Configuration AI เรียบร้อยแล้ว!",
+      variant: "success",
+    });
+  }
+
 
   return (
     <SidebarProvider>
@@ -597,16 +640,34 @@ export default function UploadPage() {
                     }`}
                 >
                   <input {...getInputProps()} />
-                  <Upload className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-                  {isDragActive ? (
-                    <p className="text-lg font-medium">วางไฟล์ที่นี่...</p>
-                  ) : (
-                    <>
-                      <p className="text-lg font-medium mb-2">ลากและวางไฟล์ที่นี่</p>
-                      <p className="text-sm text-muted-foreground mb-4">หรือคลิกเพื่อเลือกไฟล์</p>
-                      <Button variant="outline" className="w-fit">เลือกไฟล์</Button>
-                    </>
-                  )}
+                  {files?.length == 0 ?
+                    <Upload className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
+                    : files?.length > 0 && successRender == false ?
+                      <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mb-4"></div>
+                      : files?.length > 0 && successRender == true &&
+                      <CheckCheck className="mx-auto h-12 w-12 text-green-600 mb-4" />
+                  }
+                  {files?.length == 0 ?
+                    isDragActive ? (
+                      <p className="text-lg font-medium">วางไฟล์ที่นี่...</p>
+                    ) : (
+                      <>
+                        <p className="text-lg font-medium mb-2">ลากและวางไฟล์ที่นี่</p>
+                        <p className="text-sm text-muted-foreground mb-4">หรือคลิกเพื่อเลือกไฟล์</p>
+                        <Button variant="outline" className="w-fit">เลือกไฟล์</Button>
+                      </>
+                    )
+                    : files?.length > 0 && successRender == false ?
+                      <>
+                        <p className="text-lg font-medium mb-2 animate-pulse">กำลังประมวลผล</p>
+                        <p className="text-sm text-muted-foreground mb-4 animate-pulse">กรุณารอสักครู่</p>
+                      </>
+                      : files?.length > 0 && successRender == true &&
+                      <>
+                        <p className="text-lg font-medium mb-2">ประมวลผลเสร็จสิ้น</p>
+                        {/* <p className="text-sm text-muted-foreground mb-4 animate-pulse">กรุณารอสักครู่</p> */}
+                      </>
+                  }
 
                   {/* Progress Bar Inside Drop Zone */}
                   {files?.length > 0 && (
@@ -618,17 +679,17 @@ export default function UploadPage() {
                             <span className="truncate">{file.name}</span>
 
                             {/* <span className="text-muted-foreground">{file.progress}%</span> */}
-                            <span className="text-muted-foreground">{!loading ? 50 : 100}%</span>
+                            <span className="text-muted-foreground">{!successRender ? number : 100}%</span>
                           </div>
                           {/* <Progress value={file.progress} className="h-2" /> */}
-                          <Progress value={!loading ? 50 : 100} className="h-2" />
+                          <Progress value={!successRender ? number : 100} className="h-2" color={!successRender ? '#278BF5' : '#2FBA2D'} />
                         </div>
                       ))}
                     </div>
                   )}
                 </div>
                 <div>
-                  <AIConfigModal mode='form' />
+                  <AIConfig mode='form' returnResult={(e: any) => settingAI(e)} />
                 </div>
               </CardContent>
             </Card>
@@ -702,268 +763,23 @@ export default function UploadPage() {
               </CardContent>
             </Card>
 
-
-
-
-
-
-
-
-
-
-
-
-
-            {/* service พร้อมต่อ สุดหล่อพร้อมยัง */}
-            {/* <Card className="flex flex-col col-span-4 bg-white">
-              <CardHeader>
-                <CardTitle>OCR Image Details</CardTitle>
-                <CardDescription>
-                  {'ผลลัพธ์จาก OCR'}
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="flex-1 flex flex-col">
-            
-                <div className="p-4">
-                  {loading && <div>Loading images...</div>}
-
-                  <div className="flex-wrap gap-4 mt-4">
-                    {!loading && imagesWithHex.map((img, idx) => (
-                      <div
-                        key={idx}
-                        className="border p-2 cursor-pointer"
-                        onClick={() => setSelected(img)}
-                      >
-                        <img src={img.hex} alt={`page-${idx}`} className="w-full" />
-                      </div>
-                    ))}
-
-                    {selected && (
-                      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                        <div className="bg-white w-3/4 h-3/4 flex">
-                          <div className="w-1/2 p-2 border-r">
-                            <img src={selected.hex} alt="selected" className="w-full h-full object-contain" />
-                          </div>
-                          <div className="w-1/2 p-4 overflow-auto">
-                            <pre>{selected.typhoon_ocr}</pre>
-                          </div>
-                          <button
-                            className="absolute top-2 right-2 p-2 bg-red-500 text-white rounded"
-                            onClick={() => setSelected(null)}
-                          >
-                            Close
-                          </button>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </CardContent>
-            </Card> */}
-
-            {/* <Card className="flex flex-col col-span-4 bg-white">
-              <CardHeader>
-                <CardTitle>OCR Image Details</CardTitle>
-                <CardDescription>
-                  {'ผลลัพธ์จาก OCR'}
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="flex-1 flex flex-col">
-                <div className="p-4">
-                  {loading && <div>Loading images...</div>}
-
-                  <div className="flex-wrap  mt-4">
-                    ออกแบบหน้าตรงนี้ให้เหมือน view pdf ด้านซ้ายมี img.hex ด้านขวามี img.typhoon_ocr
-                    ทำให้พอดีกับ Card และสวยงาม อ่านง่าย
-                    {!loading && imagesWithHex.map((img, idx) => (
-                      <div
-                        key={idx}
-                        className="w-full border p-2 cursor-pointer"
-                        onClick={() => setSelected(img)}
-                      >
-                        <div className="bg-white w-full h-3/4 flex">
-
-                          <div className="w-1/2 p-2 border-r">
-                            <img src={img.hex} alt="selected" className="w-full h-full object-contain" />
-                          </div>
-
-                          <div className="w-full p-4 overflow-auto">
-                            <pre>{img.typhoon_ocr}</pre>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </CardContent>
-            </Card> */}
-
-
-
-            {/* <Card className="flex flex-col col-span-4 bg-white h-[700px]">
-              <CardHeader>
-                <CardTitle>OCR Image Details</CardTitle>
-                <CardDescription>ผลลัพธ์จาก OCR</CardDescription>
-              </CardHeader>
-
-              <CardContent className="flex-1 overflow-auto p-2 space-y-4">
-                {loading && <div>Loading images...</div>}
-
-                {!loading && imagesWithHex.map((img, idx) => (
-                  <div
-                    key={idx}
-                    className="flex border rounded shadow-sm overflow-hidden cursor-pointer hover:shadow-md transition h-[500px]"
-                    onClick={() => setSelected(img)}
-                  >
-                    <div className="w-1/2 bg-gray-100 flex justify-center items-center p-2">
-                      <img
-                        src={img.hex}
-                        alt={`page-${idx}`}
-                        className="max-h-full max-w-full object-contain"
-                      />
-                    </div>
-
-                    <div className="w-1/2 p-4 overflow-auto bg-white">
-                      <pre className="whitespace-pre-wrap break-words">{img.typhoon_ocr}</pre>
-                    </div>
-                  </div>
-                ))}
-              </CardContent>
-            </Card> */}
-
-
-            {/* 1 */}
-            {/* <Card className="flex flex-col col-span-4 bg-white h-[800px]">
-              <CardHeader>
-                <CardTitle>OCR Image Details</CardTitle>
-                <CardDescription>ผลลัพธ์จาก OCR</CardDescription>
-              </CardHeader>
-
-              <CardContent className="flex-1 overflow-auto p-2 space-y-6">
-                {loading && <div>Loading images...</div>}
-
-                {!loading && imagesWithHex.map((img, idx) => (
-                  <div
-                    key={idx}
-                    className="flex border rounded shadow-sm overflow-hidden cursor-pointer hover:shadow-md transition h-[600px]"
-                    onClick={() => setSelected(img)}
-                  >
-                    <div className="w-1/2 bg-gray-100 flex justify-center items-center p-2">
-                      <img
-                        src={img.hex}
-                        alt={`page-${idx}`}
-                        className="max-h-full max-w-full object-contain"
-                      />
-                    </div>
-
-                    <div className="w-1/2 p-4 overflow-auto bg-white flex flex-col">
-                      <pre
-                        className="whitespace-pre-wrap break-words"
-                        style={{
-                          fontSize: '0.80rem', // ย่อข้อความให้พอดีกับภาพ
-                          lineHeight: '1.1rem'
-                        }}
-                      >
-                        {img.typhoon_ocr}
-                      </pre>
-                    </div>
-                  </div>
-                ))}
-              </CardContent>
-            </Card> */}
-
-
-
-            {/* 2 */}
-            {/* <Card className="flex flex-col col-span-4 bg-white h-[800px]">
-              <CardHeader>
-                <CardTitle>OCR Image Details</CardTitle>
-                <CardDescription>ผลลัพธ์จาก OCR</CardDescription>
-              </CardHeader>
-
-              <CardContent className="flex-1 overflow-auto p-2 space-y-6">
-                {loading && <div>Loading images...</div>}
-
-                {!loading && imagesWithHex.map((img, idx) => (
-                  <div
-                    key={idx}
-                    className="flex flex-col border rounded shadow-sm overflow-hidden cursor-pointer hover:shadow-md transition"
-                  >
-                    <div className="bg-gray-100 px-4 py-1 text-sm text-gray-700 font-medium">
-                      Page {idx + 1}
-                    </div>
-
-                    <div className="flex h-[600px]">
-                      <div
-                        className="w-1/2 bg-gray-100 flex justify-center items-center p-2 cursor-zoom-in"
-                        onClick={() => setSelected({ hex: img.hex, typhoon_ocr: img.typhoon_ocr })}
-                      >
-                        <img
-                          src={img.hex}
-                          alt={`page-${idx}`}
-                          className="max-h-full max-w-full object-contain"
-                        />
-                      </div>
-
-                      <div className="w-1/2 p-4 overflow-auto bg-white flex flex-col">
-                        <pre
-                          className="whitespace-pre-wrap break-words"
-                          style={{
-                            fontSize: '0.80rem', // ย่อข้อความให้พอดีกับภาพ
-                            lineHeight: '1.1rem',
-                          }}
-                        >
-                          {img.typhoon_ocr}
-                        </pre>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </CardContent>
-
-              {selected && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-                  <div className="bg-white w-3/4 h-3/4 flex relative rounded shadow-lg">
-                    <div className="w-1/2 p-2 flex justify-center items-center bg-gray-100">
-                      <img
-                        src={selected.hex}
-                        alt="expanded"
-                        className="max-h-full max-w-full object-contain"
-                      />
-                    </div>
-                    <div className="w-1/2 p-4 overflow-auto">
-                      <pre className="whitespace-pre-wrap break-words">{selected.typhoon_ocr}</pre>
-                    </div>
-                    <button
-                      className="absolute top-2 right-2 px-3 py-1 bg-red-500 text-white rounded"
-                      onClick={() => setSelected(null)}
-                    >
-                      Close
-                    </button>
-                  </div>
-                </div>
-              )}
-            </Card> */}
-
-
-
             {/* 3 working */}
             <Card className={`flex flex-col col-span-4 bg-white min-h-[320px] h-auto ${imagesWithHex?.length > 0 && 'h-[800px]'} overflow-y-auto`}>
               {/* <Card className={`flex flex-col col-span-4 bg-white min-h-[320px] h-[800px] ${imagesWithHex?.length > 0 && 'h-[800px]'} overflow-y-auto`}> */}
               <CardHeader>
-                <CardTitle>OCR Image Details</CardTitle>
-                <CardDescription>ผลลัพธ์จาก AI OCR</CardDescription>
+                <CardTitle>ผลลัพธ์</CardTitle>
+                <CardDescription>ข้อมูลผลลัพธ์ที่ได้จาก AI OCR {!loading && imagesWithHex?.length > 0 && `(${imagesWithHex?.length} Pages)`}</CardDescription>
               </CardHeader>
 
-              <CardContent className="flex-1 overflow-auto p-2 space-y-6">
+              <CardContent className="flex-1 overflow-auto p-2 space-y-6 custom-scroll">
                 {/* {loading && <div>Loading images...</div>} */}
                 {loading && (
-                  <div className="flex flex-col items-center justify-center py-10 space-y-4">
+                  <div className="flex gap-3 items-center justify-center py-10 space-y-4">
                     {/* Spinner */}
-                    <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                    <div className="w-7 h-7 border-2 border-gray-500 border-t-transparent rounded-full animate-spin"></div>
 
                     {/* Loading text */}
-                    <p className="text-gray-600 text-sm font-medium animate-pulse">
+                    <p className="text-gray-600 text-sm font-medium animate-pulse mb-3">
                       กำลังโหลดรูปภาพ OCR ...
                     </p>
                   </div>
@@ -971,26 +787,29 @@ export default function UploadPage() {
                 }
 
                 {
-                  !loading && imagesWithHex.length <= 0 &&
-                  <div className="flex-1 flex items-center justify-center text-muted-foreground">
-                    <div className="text-center">
-                      <FileText className="mx-auto h-16 w-16 mb-4 opacity-50" />
-                      <p>เลือกไฟล์เพื่อดูผลลัพธ์ OCR</p>
+                  !loading && imagesWithHex?.length <= 0 && files?.length == 0 ?
+                    <div className="flex-1 flex items-center justify-center text-muted-foreground">
+                      <div className="text-center">
+                        <FileText className="mx-auto h-16 w-16 mb-4 opacity-50" />
+                        <p>เลือกไฟล์เพื่อดูผลลัพธ์ OCR</p>
+                      </div>
                     </div>
-                  </div>
+                    :
+                    !loading && files?.length > 0 && imagesWithHex?.length <= 0 &&
+                    <div className="flex-1 flex items-center justify-center text-muted-foreground gap-3 h-full">
+                      <div className="w-7 h-7 border-2 border-gray-500 border-t-transparent rounded-full animate-spin"></div>
+                      <p className="animate-pulse">กำลังรออัพโหลด OCR</p>
+                    </div>
                 }
 
-
-
-
-                {imagesWithHex.map((img, idx) => (
+                {imagesWithHex?.map((img, idx) => (
                   // {mock_data_ocr_2.map((img, idx) => (
                   <div
                     key={idx}
-                    className="flex flex-col border rounded shadow-sm overflow-hidden cursor-pointer hover:shadow-md transition"
+                    className="flex flex-col border rounded shadow-sm overflow-hidden cursor-pointer hover:shadow-md transition pb-5 bg-gray-100 anifade"
                   >
                     {/* Page number */}
-                    <div className="bg-gray-100 px-4 py-1 text-sm text-gray-700 font-medium text-[20px]">
+                    <div className="bg-gray-100 px-4 py-1 text-md text-gray-700 font-medium">
                       Page {idx + 1}
                     </div>
 
@@ -1015,7 +834,7 @@ export default function UploadPage() {
                       </div>
 
                       {/* Right: OCR text */}
-                      <div className="w-1/2 p-4 overflow-auto bg-white flex flex-col">
+                      <div className="w-1/2 p-4 overflow-auto bg-white flex flex-col rounded-lg custom-scroll-gray">
                         {idx < loadedImages ? (<>
                           <pre
                             className="whitespace-pre-wrap break-words pb-2"
@@ -1057,50 +876,29 @@ export default function UploadPage() {
                     </div>
                   </div>
                 ))}
-
-
-
-
-
-
               </CardContent>
 
               {/* Modal แสดงเฉพาะรูปใหญ่ */}
               {selectedImg && (
-                <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50 p-4">
-                  <div className="relative bg-white rounded shadow-lg max-w-[90%] max-h-[90%] overflow-y-auto">
+                <div className="fixed inset-0 bg-black/50 bg-opacity-30 flex items-center justify-center z-50 p-4">
+                  <div className="relative bg-white rounded shadow-lg max-w-[90%] max-h-[90%] overflow-y-auto custom-scroll anifade">
                     <img
                       src={selectedImg}
                       alt="expanded"
                       className="max-w-full max-h-full object-contain"
                     />
+                  </div>
+                  <div className="relative h-full">
                     <button
-                      className="absolute top-2 right-2 px-3 py-1 bg-gray-400 text-white rounded"
+                      className="absolute top-6 -right-6 px-3 py-3 bg-red-500 text-white rounded-xl cursor-pointer"
                       onClick={() => setSelectedImg(null)}
                     >
-                      Close
+                      <X size={18} />
                     </button>
                   </div>
                 </div>
               )}
             </Card>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
           </div>
         </div>
       </SidebarInset>
