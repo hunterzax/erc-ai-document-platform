@@ -111,3 +111,31 @@ const mock_data_2 = [
         "vectors": null
     },
 ]
+
+
+
+
+// raw doc
+const raw_doc_1 = [
+    {
+        "id": 7784,
+        "title": "กฎหมายลำดับรอง_มาตรา7_ระเบียบ_หมวด_1_บททั่วไป_2",
+        "file_name": "กฎหมายลำดับรอง_มาตรา7_ระเบียบ_หมวด_1_บททั่วไป_2.pdf",
+        "created_at": "1756866525.871752",
+        "context_len": 14961
+    },
+    {
+        "id": 7783,
+        "title": "หนังสือเชิญ NMS",
+        "file_name": "หนังสือเชิญ NMS.pdf",
+        "created_at": "1756832531.806558",
+        "context_len": 1897
+    },
+    {
+        "id": 7782,
+        "title": "หนังสือเชิญ NMS",
+        "file_name": "หนังสือเชิญ NMS.pdf",
+        "created_at": "1756832496.029572",
+        "context_len": 1897
+    },
+]
