@@ -24,8 +24,9 @@ import { useState, useCallback, useEffect } from "react"
 import { useDropzone } from "react-dropzone"
 import { useToast } from "@/hooks/use-toast"
 import { AppHeader } from "@/components/header-bar"
-import PdfViewer from "@/components/ui/pdfviewer"
+// import PdfViewer from "@/components/ui/pdfviewer"
 import axios from "axios"
+import dynamic from "next/dynamic"
 interface ImageItem {
   source: string;
   typhoon_ocr: string;
@@ -67,6 +68,9 @@ interface ExtractionParams {
   repetition_penalty: number
   pages: (number | null)[]
 }
+const PdfViewer = dynamic(() => import('@/components/ui/pdfviewer'), {
+  ssr: false,
+})
 
 export default function UploadPage() {
   const [files, setFiles] = useState<UploadedFile[]>([])
