@@ -145,29 +145,31 @@ export default function SearchPage() {
 
 
   const fetchData = async () => {
-    // console.log('fetchData')
-    // http://10.100.92.20:4600/raw_docs?limit=200&offset=0
+    try {
+      let config = {
+        method: 'get',
+        maxBodyLength: Infinity,
+        // url: `${URL_SEARCH}?q=${searchQuery}&limit=100&score_threshold=0.9`,
+        url: `${URL_RAW_DOC}`,
+        headers: {}
+      };
 
-    let config = {
-      method: 'get',
-      maxBodyLength: Infinity,
-      // url: `${URL_SEARCH}?q=${searchQuery}&limit=100&score_threshold=0.9`,
-      url: `${URL_RAW_DOC}`,
-      headers: {}
-    };
+      let res_all_docs_result = await axios?.request(config)
+      // console.log('res_all_docs_result', res_all_docs_result)
 
-    let res_all_docs_result: any = await axios.request(config)
+      // ลบซ้ำ
+      const seen = new Set<string>();
+      const uniqueDocs2 = res_all_docs_result?.data?.items?.filter((doc: any) => {
+        if (seen.has(doc.file_name)) return false;
+        seen.add(doc.file_name);
+        return true;
+      });
 
-    // ลบซ้ำ
-    const seen = new Set<string>();
-    const uniqueDocs2 = res_all_docs_result?.data?.items?.filter((doc: any) => {
-      if (seen.has(doc.file_name)) return false;
-      seen.add(doc.file_name);
-      return true;
-    });
-
-    // setSourceData(res_all_docs_result?.data?.items)
-    setSourceData(uniqueDocs2)
+      // setSourceData(res_all_docs_result?.data?.items)
+      setSourceData(uniqueDocs2)
+    } catch (error) {
+      console.log(">>>> error")
+    }
   }
 
   useEffect(() => {
