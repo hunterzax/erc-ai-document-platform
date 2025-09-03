@@ -1,4 +1,5 @@
 "use client"
+import dynamic from 'next/dynamic'
 
 import { AppSidebar } from "@/components/app-sidebar"
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
@@ -25,7 +26,7 @@ import { useDropzone } from "react-dropzone"
 import { useToast } from "@/hooks/use-toast"
 import { toast as toastColor } from "react-toastify"
 import { AppHeader } from "@/components/header-bar"
-import PdfViewer from "@/components/ui/pdfviewer"
+// import PdfViewer from "@/components/ui/pdfviewer"
 import axios from "axios"
 import { mock_data_ocr_1, mock_data_ocr_2 } from "./mockDataK"
 import AIConfig from "@/components/byk/ai_setting_btn"
@@ -76,6 +77,9 @@ interface ExtractionParams {
   repetition_penalty: number
   pages: (number | null)[]
 }
+const PdfViewer = dynamic(() => import('@/components/ui/pdfviewer'), {
+  ssr: false, // <— disables server-side rendering
+})
 
 export default function UploadPage() {
   const [files, setFiles] = useState<UploadedFile[]>([])
