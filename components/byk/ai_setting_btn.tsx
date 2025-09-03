@@ -6,10 +6,18 @@ import { Label } from "@/components/ui/label"
 import { toast } from "react-toastify"
 import { Save, Settings } from "lucide-react"
 
-export function AIConfigModal({ mode }: any) {
-    const [maxToken, setMaxToken] = useState(1000)
-    const [temperature, setTemperature] = useState(0.7)
-    const [topP, setTopP] = useState(0.9)
+type FormProps = {
+    mode: 'dialog' | 'form',
+    returnResult: (result: any) => void
+}
+
+const AIConfig: React.FC<FormProps> = ({
+    mode,
+    returnResult
+}) => {
+    const [maxToken, setMaxToken] = useState(8000)
+    const [temperature, setTemperature] = useState(0.0)
+    const [topP, setTopP] = useState(1.0)
     const [topK, setTopK] = useState(50)
     const [repetitionPenalty, setRepetitionPenalty] = useState(1.0)
 
@@ -40,12 +48,21 @@ export function AIConfigModal({ mode }: any) {
     }
 
     const handleSave = () => {
+        const result: any = {
+            'max_tokens': maxToken,
+            'temperature': temperature,
+            'top_p': topP,
+            'repetition_penalty': repetitionPenalty,
+        }
+
         if (!validate()) return
         // TODO: save config logic
         toast.success("บันทึก Configuration AI เรียบร้อยแล้ว!", {
             position: "bottom-right",
             autoClose: 3000,
         })
+
+        returnResult(result)
     }
 
     return (
@@ -73,6 +90,7 @@ export function AIConfigModal({ mode }: any) {
                                 id="max-token"
                                 type="number"
                                 min={1}
+                                max={16000}
                                 value={maxToken}
                                 onChange={(e) => setMaxToken(Number(e.target.value))}
                                 className="w-full bg-white rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
@@ -126,8 +144,24 @@ export function AIConfigModal({ mode }: any) {
                                 type="number"
                                 step={0.1}
                                 min={0}
+                                max={1}
                                 value={repetitionPenalty}
-                                onChange={(e) => setRepetitionPenalty(Number(e.target.value))}
+                                // onChange={(e) => setRepetitionPenalty(Number(e.target.value))}
+                                onChange={(e) => {
+                                    const raw = e.target.value;
+                                    const value = Number(raw);
+
+                                    const min = Number(e.target.min);
+                                    const max = Number(e.target.max);
+
+                                    // ถ้า value ไม่ใช่ตัวเลขจริง (NaN) เช่นช่องว่าง ให้ข้าม
+                                    if (isNaN(value)) return;
+
+                                    // Clamp ค่าให้อยู่ในช่วง [min, max]
+                                    const clamped = Math.max(min, Math.min(max, value));
+
+                                    setRepetitionPenalty(clamped);
+                                }}
                                 className="w-full bg-white rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                             />
                         </div>
@@ -149,8 +183,24 @@ export function AIConfigModal({ mode }: any) {
                         id="max-token"
                         type="number"
                         min={1}
+                        max={16000}
                         value={maxToken}
-                        onChange={(e) => setMaxToken(Number(e.target.value))}
+                        // onChange={(e) => setMaxToken(Number(e.target.value))}
+                        onChange={(e) => {
+                            const raw = e.target.value;
+                            const value = Number(raw);
+
+                            const min = Number(e.target.min);
+                            const max = Number(e.target.max);
+
+                            // ถ้า value ไม่ใช่ตัวเลขจริง (NaN) เช่นช่องว่าง ให้ข้าม
+                            if (isNaN(value)) return;
+
+                            // Clamp ค่าให้อยู่ในช่วง [min, max]
+                            const clamped = Math.max(min, Math.min(max, value));
+
+                            setMaxToken(clamped);
+                        }}
                         className="w-full bg-white rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     />
                 </div>
@@ -164,7 +214,22 @@ export function AIConfigModal({ mode }: any) {
                         min={0}
                         max={2}
                         value={temperature}
-                        onChange={(e) => setTemperature(Number(e.target.value))}
+                        // onChange={(e) => setTemperature(Number(e.target.value))}
+                        onChange={(e) => {
+                            const raw = e.target.value;
+                            const value = Number(raw);
+
+                            const min = Number(e.target.min);
+                            const max = Number(e.target.max);
+
+                            // ถ้า value ไม่ใช่ตัวเลขจริง (NaN) เช่นช่องว่าง ให้ข้าม
+                            if (isNaN(value)) return;
+
+                            // Clamp ค่าให้อยู่ในช่วง [min, max]
+                            const clamped = Math.max(min, Math.min(max, value));
+
+                            setTemperature(clamped);
+                        }}
                         className="w-full bg-white rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     />
                 </div>
@@ -174,11 +239,26 @@ export function AIConfigModal({ mode }: any) {
                     <Input
                         id="top-p"
                         type="number"
-                        step={0.01}
+                        step={0.1}
                         min={0}
                         max={1}
                         value={topP}
-                        onChange={(e) => setTopP(Number(e.target.value))}
+                        // onChange={(e) => setTopP(Number(e.target.value))}
+                        onChange={(e) => {
+                            const raw = e.target.value;
+                            const value = Number(raw);
+
+                            const min = Number(e.target.min);
+                            const max = Number(e.target.max);
+
+                            // ถ้า value ไม่ใช่ตัวเลขจริง (NaN) เช่นช่องว่าง ให้ข้าม
+                            if (isNaN(value)) return;
+
+                            // Clamp ค่าให้อยู่ในช่วง [min, max]
+                            const clamped = Math.max(min, Math.min(max, value));
+
+                            setTopP(clamped);
+                        }}
                         className="w-full bg-white rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     />
                 </div>
@@ -202,8 +282,24 @@ export function AIConfigModal({ mode }: any) {
                         type="number"
                         step={0.1}
                         min={0}
+                        max={1}
                         value={repetitionPenalty}
-                        onChange={(e) => setRepetitionPenalty(Number(e.target.value))}
+                        // onChange={(e) => setRepetitionPenalty(Number(e.target.value))}
+                        onChange={(e) => {
+                            const raw = e.target.value;
+                            const value = Number(raw);
+
+                            const min = Number(e.target.min);
+                            const max = Number(e.target.max);
+
+                            // ถ้า value ไม่ใช่ตัวเลขจริง (NaN) เช่นช่องว่าง ให้ข้าม
+                            if (isNaN(value)) return;
+
+                            // Clamp ค่าให้อยู่ในช่วง [min, max]
+                            const clamped = Math.max(min, Math.min(max, value));
+
+                            setRepetitionPenalty(clamped);
+                        }}
                         className="w-full bg-white rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     />
                 </div>
@@ -218,3 +314,4 @@ export function AIConfigModal({ mode }: any) {
     )
 }
 
+export default AIConfig;

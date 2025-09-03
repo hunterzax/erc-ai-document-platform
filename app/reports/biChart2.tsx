@@ -436,7 +436,7 @@ const Dashboard = () => {
 
     const handleLayoutChange = (newLayout: any) => {
         setLayout(newLayout);
-        console.log('newLayout', newLayout)
+        // console.log('newLayout', newLayout)
         // localStorage.setItem("energyDashboardLayout", JSON.stringify(newLayout));
         localStorage.setItem("energyDashboardLayout", JSON.stringify(default_k_layout));
         // localStorage.setItem("energyDashboardLayout", JSON.stringify(DEFAULT_LAYOUT));

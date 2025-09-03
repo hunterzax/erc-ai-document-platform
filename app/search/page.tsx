@@ -112,7 +112,7 @@ export default function SearchPage() {
     };
 
     let res_search_result = await axios.request(config)
-    console.log('res_search_result', res_search_result)
+    // console.log('res_search_result', res_search_result)
 
     // กรอง source ซ้ำออก
     const uniqueBySource = res_search_result?.data?.items?.filter((item: any, index: any, self: any) => index === self.findIndex((t: any) => t.source === item.source));
@@ -145,7 +145,7 @@ export default function SearchPage() {
 
 
   const fetchData = async () => {
-    console.log('fetchData')
+    // console.log('fetchData')
     // http://10.100.92.20:4600/raw_docs?limit=200&offset=0
 
     let config = {
@@ -156,8 +156,7 @@ export default function SearchPage() {
       headers: {}
     };
 
-    let res_all_docs_result = await axios.request(config)
-    console.log('res_all_docs_result', res_all_docs_result)
+    let res_all_docs_result: any = await axios.request(config)
 
     // ลบซ้ำ
     const seen = new Set<string>();
@@ -166,8 +165,6 @@ export default function SearchPage() {
       seen.add(doc.file_name);
       return true;
     });
-
-    console.log('uniqueDocs2', uniqueDocs2);
 
     // setSourceData(res_all_docs_result?.data?.items)
     setSourceData(uniqueDocs2)
@@ -249,8 +246,8 @@ export default function SearchPage() {
                       </SelectTrigger>
 
                       <SelectContent className="rounded-lg shadow-md">
-                        {sourceData?.map((item: any) => (
-                          <SelectItem value={item?.file_name}>{item.title}</SelectItem>
+                        {sourceData?.map((item: any, index: any) => (
+                          <SelectItem key={index} value={item?.file_name}>{item.title}</SelectItem>
                         ))}
                       </SelectContent>
                     </Select>

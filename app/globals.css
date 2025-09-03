@@ -18,6 +18,23 @@
   border-radius: 10px;
 }
 
+.custom-scroll-gray::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+/* Track */
+.custom-scroll-gray::-webkit-scrollbar-track {
+  background: #d6d6d6;
+  border-radius: 10px;
+}
+
+/* Handle */
+.custom-scroll-gray::-webkit-scrollbar-thumb {
+  background: #9c9c9c;
+  border-radius: 10px;
+}
+
 .anifade {
   animation: fadeup 1s !important;
 }

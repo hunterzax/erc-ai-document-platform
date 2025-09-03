@@ -26,7 +26,6 @@ import { AppHeader } from "@/components/header-bar"
 
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { AIConfigModal } from "@/components/byk/ai_setting_btn"
 
 export default function SettingsPage() {
 
@@ -129,7 +128,7 @@ export default function SettingsPage() {
       <Tabs defaultValue="system" className="space-y-6">
         <ToastContainer />
 
-        <AIConfigModal mode={'dialog'}/>
+        {/* <AIConfigModal mode={'dialog'}/> */}
         {/* <TabsList className="grid w-full grid-cols-5">
               <TabsTrigger value="system">ระบบ</TabsTrigger>
               <TabsTrigger value="security">ความปลอดภัย</TabsTrigger>
@@ -810,7 +809,7 @@ export default function SettingsPage() {
         <AppHeader title={'ตั้งค่า'} />
 
         <div className="flex flex-1 flex-col gap-6 p-4 anifade">
-          <div className="grid grid-cols-4 gap-6">
+          <div className="grid grid-cols-6 gap-6">
             <div className="flex flex-col flex-1 col-span-1 gap-3 border-r border-[#ebebeb] pr-5">
               {menuSetting?.map((item: any, index: any) => {
                 return (
@@ -827,7 +826,7 @@ export default function SettingsPage() {
                 )
               })}
             </div>
-            <div className="col-span-3">
+            <div className="col-span-5">
               {menuSetting?.find((item: any) => item?.label == 'ระบบ')?.active == true &&
                 <Card>
                   <CardHeader>

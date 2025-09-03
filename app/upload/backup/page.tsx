@@ -126,9 +126,6 @@ export default function UploadPage() {
 
       setisLoading(true);
 
-      console.log(">>> file", file)
-      console.log(">>> originalFile", originalFile)
-
       let data = new FormData();
       data.append('file', originalFile);
       data.append('tags', 'กฏหมาย,กฏหมายพลังงาน');
@@ -165,10 +162,10 @@ export default function UploadPage() {
           // ส่ง postOCR?.data?.pdf_name
           // เอาชื่อไฟล์ใน res.images
           //http://10.100.92.20:4600/qdrant/file_name/docs_section_single/ตัวอย่างใบเสร็จ.pdf
-          console.log(">>> postOCR", postOCR)
+          // console.log(">>> postOCR", postOCR)
           // console.log(">>> postOCR", postOCR?.data?.pdf_name)
           const res_step_1 = await getOCR(`${postOCR?.data?.pdf_name}.pdf`)
-          console.log('res_step_1', res_step_1)
+          // console.log('res_step_1', res_step_1)
 
           // วนลูปส่ง res_step_1_k.images.source ไปที่ getImageOfPage 
           // ซึ่ง response จาก getImageOfPage จะได้เป็นรูป เราน่าจะเอา hexcode มาเก็บไว้ได้

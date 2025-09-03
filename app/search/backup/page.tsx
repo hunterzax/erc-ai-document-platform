@@ -111,7 +111,7 @@ export default function SearchPage() {
   }
 
   const exportResults = (format: string) => {
-    console.log(`Exporting results as ${format}`)
+    // console.log(`Exporting results as ${format}`)
     // Implementation for export functionality
   }
 
