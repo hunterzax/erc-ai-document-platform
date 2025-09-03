@@ -217,3 +217,4 @@ export function AIConfigModal({ mode }: any) {
             </div>
     )
 }
+

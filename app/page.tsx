@@ -46,12 +46,34 @@ const navItems = [
   { title: "ตั้งค่า", url: "/settings", icon: Settings },
 ]
 
+
+const performanceData = [
+  { metric: "เวลาตอบสนองเฉลี่ย", value: "1.8s", target: "≤2s", status: "good" },
+  { metric: "ความแม่นยำ OCR", value: "94.2%", target: "≥90%", status: "good" },
+  { metric: "Uptime ระบบ", value: "99.8%", target: "≥99.5%", status: "good" },
+  { metric: "การใช้งาน Storage", value: "67%", target: "≤80%", status: "good" },
+]
+
+const getStatusBadge = (status: string) => {
+  switch (status) {
+    case "good":
+      return <Badge className="w-auto text-[14px] bg-green-100 text-green-800">ดี</Badge>
+    case "warning":
+      return <Badge className="w-auto text-[14px] bg-yellow-100 text-yellow-800">เตือน</Badge>
+    case "critical":
+      return <Badge variant="destructive">วิกฤต</Badge>
+    default:
+      return <Badge variant="secondary">ไม่ทราบ</Badge>
+  }
+}
+
+
 export default function Page() {
   return (
     <SidebarProvider>
       <AppSidebar />
       <SidebarInset>
-        <AppHeader title={'แดชบอร์ด'}/>
+        <AppHeader title={'แดชบอร์ด'} />
         <div className="flex flex-1 flex-col gap-6 p-4">
           <div className="flex-1 overflow-auto">
             <div className="flex flex-col gap-6 anifade">
@@ -108,6 +130,29 @@ export default function Page() {
                   </CardContent>
                 </Card>
               </div>
+
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>ตัวชี้วัดประสิทธิภาพของระบบ</CardTitle>
+                  <CardDescription>ภาพรวมประสิทธิภาพของระบบในเดือนปัจจุบัน</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+                    {performanceData.map((item, index) => (
+                      <div key={index} className="p-4 border rounded-lg shadow-sm hover:shadow-md duration-200 ease-in-out">
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-sm font-medium">{item.metric}</span>
+                          {getStatusBadge(item.status)}
+                        </div>
+                        <div className="text-2xl font-bold">{item.value}</div>
+                        <div className="text-xs text-muted-foreground">เป้าหมาย: {item.target}</div>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+
 
               {/* Additional Information Section */}
               <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
