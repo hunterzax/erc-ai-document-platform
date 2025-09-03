@@ -22,6 +22,9 @@ import "react-resizable/css/styles.css";
 
 import "react-grid-layout/css/styles.css";
 import "react-resizable/css/styles.css";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Edit } from "lucide-react";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
 
@@ -90,8 +93,11 @@ const reserveMarginData = [
 // Enterprise styled card
 function Card({ title, children }: any) {
     return (
-        <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-4 h-full flex flex-col">
-            <h2 className="text-lg font-semibold text-gray-800 border-b pb-2 mb-3">{title}</h2>
+        <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-4 h-full flex flex-col cursor-pointer anifade">
+            <div className="flex justify-between items-center border-b pb-2 mb-3">
+                <h2 className="text-lg font-semibold text-gray-800">{title}</h2>
+                <Edit size={16} className="hover:text-blue-500 duration-200 ease-in-out" />
+            </div>
             <div className="flex-1 min-h-[200px]">
                 {children}
             </div>
@@ -407,9 +413,9 @@ function KPIStrip() {
     ];
 
     return (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
-            {kpis.map((k, i) => (
-                <div key={i} className="rounded-2xl border bg-white p-4 shadow-sm">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-4 px-3">
+            {kpis?.map((k, i) => (
+                <div key={i} className="rounded-2xl border bg-transparent p-4 shadow-sm">
                     <div className="text-xs text-gray-500">{k.label}</div>
                     <div className="mt-1 text-2xl font-semibold tracking-tight">
                         {k.value}
@@ -442,121 +448,98 @@ const Dashboard = () => {
         // localStorage.setItem("energyDashboardLayout", JSON.stringify(DEFAULT_LAYOUT));
     };
 
+
+    const [isLoading, setisLoading] = useState(true)
+
+    useEffect(() => {
+        setTimeout(() => {
+            setisLoading(false);
+        }, 1000);
+    }, [])
+
+
     return (
-        <div className="p-6 bg-gray-50  min-h-screen">
-            {/* <h1 className="text-2xl font-bold text-gray-900 mb-6">ข้อมูลพลังงาน คณะกรรมการกำกับกิจการพลังงาน</h1> */}
-
-            {/* <div className="flex justify-between items-center mb-3">
-                <h1 className="text-xl font-bold">📊 ข้อมูลพลังงาน คณะกรรมการกำกับกิจการพลังงาน</h1>
-            </div> */}
-
+        <div className="p-6 bg-gray-50 h-auto">
             <KPIStrip />
 
+            {isLoading == false ?
+                <ResponsiveGridLayout
+                    className="layout"
+                    layouts={{ lg: layout }}
+                    breakpoints={{ lg: 1200, md: 996, sm: 768, xs: 480 }}
+                    // cols={{ lg: 12, md: 10, sm: 6, xs: 2 }}
+                    cols={{ lg: 10, md: 10, sm: 6, xs: 2 }}
+                    rowHeight={120}
+                    onLayoutChange={handleLayoutChange}
+                    isResizable
+                    isDraggable
+                >
+                    <div key="demand">
+                        <Card title="ความต้องการไฟฟ้า (MW)">
+                            <DemandChart />
+                        </Card>
+                    </div>
+                    <div key="genMix">
+                        <Card title="สัดส่วนการผลิตไฟฟ้า (%)">
+                            <GenMixChart />
+                        </Card>
+                    </div>
+                    <div key="tariff">
+                        <Card title="อัตราค่าไฟ Ft (บาท/หน่วย)">
+                            <TariffChart />
+                        </Card>
+                    </div>
+                    <div key="importCost">
+                        <Card title="ต้นทุนเชื้อเพลิงนำเข้า (ล้านบาท)">
+                            <ImportCostChart />
+                        </Card>
+                    </div>
+                    <div key="ev">
+                        <Card title="จำนวนรถ EV ลงทะเบียน (คัน)">
+                            <EVChart />
+                        </Card>
+                    </div>
+                    <div key="budget">
+                        <Card title="งบประมาณตามหน่วยงาน (ล้านบาท)">
+                            <BudgetChart />
+                        </Card>
+                    </div>
+                    <div key="emission">
+                        <Card title="การปล่อยก๊าซคาร์บอน (MtCO2)">
+                            <EmissionChart />
+                        </Card>
+                    </div>
+                    <div key="reserveMargin">
+                        <Card title="สำรองกำลังการผลิต (%)">
+                            <ReserveMarginChart />
+                        </Card>
+                    </div>
 
-            {/* <GridLayout
-                className="layout"
-                layout={layout}
-                cols={2}
-                rowHeight={400}
-                width={1200}
-                onLayoutChange={handleLayoutChange}
-                draggableHandle=".drag-handle"
-            >
-                <div key="demand">
-                    <Card title="Electricity Demand (MW)">
-                        <DemandChart />
-                    </Card>
+                </ResponsiveGridLayout>
+                :
+                <div className="grid grid-cols-2 gap-3 anifade px-3">
+                    <div className="space-y-2 h-full items-center justify-center border border-gray-300 p-4 rounded-lg shadow-sm">
+                        <Skeleton className="h-2 w-full bg-gray-200" />
+                        <Skeleton className="h-2 w-3/4 bg-gray-200" />
+                        <Skeleton className="h-2 w-1/2 bg-gray-200" />
+                    </div>
+                    <div className="space-y-2 h-full items-center justify-center border border-gray-300 p-4 rounded-lg shadow-sm">
+                        <Skeleton className="h-2 w-full bg-gray-200" />
+                        <Skeleton className="h-2 w-3/4 bg-gray-200" />
+                        <Skeleton className="h-2 w-1/2 bg-gray-200" />
+                    </div>
+                    <div className="space-y-2 h-full items-center justify-center border border-gray-300 p-4 rounded-lg shadow-sm">
+                        <Skeleton className="h-2 w-full bg-gray-200" />
+                        <Skeleton className="h-2 w-3/4 bg-gray-200" />
+                        <Skeleton className="h-2 w-1/2 bg-gray-200" />
+                    </div>
+                    <div className="space-y-2 h-full items-center justify-center border border-gray-300 p-4 rounded-lg shadow-sm">
+                        <Skeleton className="h-2 w-full bg-gray-200" />
+                        <Skeleton className="h-2 w-3/4 bg-gray-200" />
+                        <Skeleton className="h-2 w-1/2 bg-gray-200" />
+                    </div>
                 </div>
-                <div key="genMix">
-                    <Card title="Generation Mix (%)">
-                        <GenMixChart />
-                    </Card>
-                </div>
-                <div key="tariff">
-                    <Card title="Tariff Ft (Baht/kWh)">
-                        <TariffChart />
-                    </Card>
-                </div>
-                <div key="importCost">
-                    <Card title="Imported Fuel Cost (MTHB)">
-                        <ImportCostChart />
-                    </Card>
-                </div>
-                <div key="ev">
-                    <Card title="EV Registration (units)">
-                        <EVChart />
-                    </Card>
-                </div>
-                <div key="budget">
-                    <Card title="Budget Allocation (MTHB)">
-                        <BudgetChart />
-                    </Card>
-                </div>
-                <div key="emission">
-                    <Card title="Carbon Emissions (MtCO2)">
-                        <EmissionChart />
-                    </Card>
-                </div>
-                <div key="reserveMargin">
-                    <Card title="Reserve Margin (%)">
-                        <ReserveMarginChart />
-                    </Card>
-                </div>
-            </GridLayout> */}
-
-
-            <ResponsiveGridLayout
-                className="layout"
-                layouts={{ lg: layout }}
-                breakpoints={{ lg: 1200, md: 996, sm: 768, xs: 480 }}
-                cols={{ lg: 12, md: 10, sm: 6, xs: 2 }}
-                rowHeight={120}
-                onLayoutChange={handleLayoutChange}
-                isResizable
-                isDraggable
-            >
-                <div key="demand">
-                    <Card title="ความต้องการไฟฟ้า (MW)">
-                        <DemandChart />
-                    </Card>
-                </div>
-                <div key="genMix">
-                    <Card title="สัดส่วนการผลิตไฟฟ้า (%)">
-                        <GenMixChart />
-                    </Card>
-                </div>
-                <div key="tariff">
-                    <Card title="อัตราค่าไฟ Ft (บาท/หน่วย)">
-                        <TariffChart />
-                    </Card>
-                </div>
-                <div key="importCost">
-                    <Card title="ต้นทุนเชื้อเพลิงนำเข้า (ล้านบาท)">
-                        <ImportCostChart />
-                    </Card>
-                </div>
-                <div key="ev">
-                    <Card title="จำนวนรถ EV ลงทะเบียน (คัน)">
-                        <EVChart />
-                    </Card>
-                </div>
-                <div key="budget">
-                    <Card title="งบประมาณตามหน่วยงาน (ล้านบาท)">
-                        <BudgetChart />
-                    </Card>
-                </div>
-                <div key="emission">
-                    <Card title="การปล่อยก๊าซคาร์บอน (MtCO2)">
-                        <EmissionChart />
-                    </Card>
-                </div>
-                <div key="reserveMargin">
-                    <Card title="สำรองกำลังการผลิต (%)">
-                        <ReserveMarginChart />
-                    </Card>
-                </div>
-
-            </ResponsiveGridLayout>
+            }
 
         </div>
     );

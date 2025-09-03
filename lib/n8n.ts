@@ -1,18 +1,18 @@
 import axios from 'axios'
 
-interface HealthResponse {
+interface N8nHealthResponse {
   status: string
   version: string
 }
 
-interface Workflow {
+interface N8nWorkflow {
   id: string
   name: string
   active: boolean
   nodes: any[]
 }
 
-interface WebhookResponse {
+interface N8nWebhookResponse {
   success: boolean
   data?: any
   error?: string
@@ -28,30 +28,30 @@ interface ChatCompletionResult {
 
 // Get default webhook URL from environment variables
 export function getDefaultWebhookUrl(): string | null {
-  return process.env._WEBHOOK_URL || null
+  return process.env.N8N_WEBHOOK_URL || null
 }
 
-// Check  health
-export async function checkHealth(): Promise<{ healthy: boolean; message: string }> {
+// Check n8n health
+export async function checkN8nHealth(): Promise<{ healthy: boolean; message: string }> {
   try {
-    const baseUrl = process.env._BASE_URL || 'http://localhost:5678'
-    // console.log('=========>',baseUrl)
+    const baseUrl = process.env.N8N_BASE_URL || 'http://localhost:5678'
+    console.log('=========>',baseUrl)
     const response = await axios.get(`${baseUrl}/api/v1/health`, {
       timeout: 5000
     })
     
     if (response.status === 200) {
-      return { healthy: true, message: ' is running and healthy' }
+      return { healthy: true, message: 'n8n is running and healthy' }
     } else {
-      return { healthy: false, message: ' is running but not healthy' }
+      return { healthy: false, message: 'n8n is running but not healthy' }
     }
   } catch (error: any) {
     if (error.code === 'ECONNREFUSED') {
-      return { healthy: false, message: 'Cannot connect to  Please make sure  is running on http://localhost:5678' }
+      return { healthy: false, message: 'Cannot connect to n8n. Please make sure n8n is running on http://localhost:5678' }
     } else if (error.code === 'ENOTFOUND') {
-      return { healthy: false, message: 'Cannot resolve  hostname. Please check your network connection and  URL.' }
+      return { healthy: false, message: 'Cannot resolve n8n hostname. Please check your network connection and n8n URL.' }
     } else if (error.response?.status === 404) {
-      return { healthy: false, message: ' API endpoint not found. Please check if  is running the correct version.' }
+      return { healthy: false, message: 'n8n API endpoint not found. Please check if n8n is running the correct version.' }
     } else {
       return { healthy: false, message: `Connection error: ${error.message}` }
     }
@@ -59,14 +59,14 @@ export async function checkHealth(): Promise<{ healthy: boolean; message: string
 }
 
 // Get active workflows
-export async function getActiveWorkflows(): Promise<Workflow[]> {
+export async function getActiveWorkflows(): Promise<N8nWorkflow[]> {
   try {
-    const baseUrl = process.env._BASE_URL || 'http://localhost:5678'
-    const apiKey = process.env._API_KEY
+    const baseUrl = process.env.N8N_BASE_URL || 'http://localhost:5678'
+    const apiKey = process.env.N8N_API_KEY
     
     const headers: any = {}
     if (apiKey) {
-      headers['X--API-KEY'] = apiKey
+      headers['X-N8N-API-KEY'] = apiKey
     }
     
     const response = await axios.get(`${baseUrl}/api/v1/workflows`, {
@@ -75,7 +75,7 @@ export async function getActiveWorkflows(): Promise<Workflow[]> {
     })
     
     if (response.status === 200) {
-      return response.data.data.filter((workflow: Workflow) => workflow.active)
+      return response.data.data.filter((workflow: N8nWorkflow) => workflow.active)
     }
     
     return []
@@ -86,16 +86,16 @@ export async function getActiveWorkflows(): Promise<Workflow[]> {
 }
 
 // Execute a specific workflow
-export async function executeWorkflow(workflowId: string, data: any): Promise<WebhookResponse> {
+export async function executeWorkflow(workflowId: string, data: any): Promise<N8nWebhookResponse> {
   try {
-    const baseUrl = process.env._BASE_URL || 'http://localhost:5678'
-    const apiKey = process.env._API_KEY
+    const baseUrl = process.env.N8N_BASE_URL || 'http://localhost:5678'
+    const apiKey = process.env.N8N_API_KEY
     
     const headers: any = {
       'Content-Type': 'application/json'
     }
     if (apiKey) {
-      headers['X--API-KEY'] = apiKey
+      headers['X-N8N-API-KEY'] = apiKey
     }
     
     const response = await axios.post(`${baseUrl}/api/v1/workflows/${workflowId}/trigger`, data, {
@@ -116,7 +116,7 @@ export async function executeWorkflow(workflowId: string, data: any): Promise<We
 }
 
 // Execute webhook directly
-export async function executeWebhook(webhookUrl: string, data: any): Promise<WebhookResponse> {
+export async function executeWebhook(webhookUrl: string, data: any): Promise<N8nWebhookResponse> {
   try {
     // Validate webhook URL
     if (!webhookUrl || typeof webhookUrl !== 'string') {
@@ -144,22 +144,22 @@ export async function executeWebhook(webhookUrl: string, data: any): Promise<Web
       if (webhookError.response?.status === 404) {
         return {
           success: false,
-          error: `Webhook not found (404). The webhook "${webhookUrl.split('/').pop()}" is not registered in  Please make sure the workflow is active and the webhook is enabled.`
+          error: `Webhook not found (404). The webhook "${webhookUrl.split('/').pop()}" is not registered in n8n. Please make sure the workflow is active and the webhook is enabled.`
         }
       } else if (webhookError.response?.status === 500) {
         return {
           success: false,
-          error: `Webhook server error (500). There was an error processing your request in the  workflow.`
+          error: `Webhook server error (500). There was an error processing your request in the n8n workflow.`
         }
       } else if (webhookError.code === 'ECONNREFUSED') {
         return {
           success: false,
-          error: `Cannot connect to  Please make sure  is running on ${new URL(webhookUrl).origin}`
+          error: `Cannot connect to n8n. Please make sure n8n is running on ${new URL(webhookUrl).origin}`
         }
       } else if (webhookError.code === 'ENOTFOUND') {
         return {
           success: false,
-          error: `Cannot resolve hostname. Please check your network connection and  URL.`
+          error: `Cannot resolve n8n hostname. Please check your network connection and n8n URL.`
         }
       } else {
         return {
@@ -177,7 +177,7 @@ export async function executeWebhook(webhookUrl: string, data: any): Promise<Web
 }
 
 // Main chat completion function
-export async function ChatCompletion(
+export async function n8nChatCompletion(
   messages: any[],
   webhookUrl?: string,
   systemPrompt?: string
@@ -185,7 +185,7 @@ export async function ChatCompletion(
   try {
     // Use provided webhook URL or default from environment
     const targetWebhookUrl = webhookUrl || getDefaultWebhookUrl()
-    // console.log('=========>',targetWebhookUrl)
+    console.log('=========>',targetWebhookUrl)
     if (!targetWebhookUrl) {
       return {
         success: false,
@@ -193,7 +193,7 @@ export async function ChatCompletion(
       }
     }
 
-    // Prepare the data to send to 
+    // Prepare the data to send to n8n
     const data = {
       messages,
       systemPrompt: systemPrompt || 'You are a helpful AI assistant.',
@@ -202,7 +202,7 @@ export async function ChatCompletion(
 
     // Execute the webhook
     const result = await executeWebhook(targetWebhookUrl, data)
-    // console.log(result)
+    console.log(result)
     if (!result.success) {
       return {
         success: false,
@@ -216,7 +216,7 @@ export async function ChatCompletion(
     if (!aiResponse) {
       return {
         success: false,
-        error: 'No AI response received from  workflow'
+        error: 'No AI response received from n8n workflow'
       }
     }
 
@@ -243,10 +243,10 @@ export async function ChatCompletion(
     }
 
   } catch (error: any) {
-    console.error('ChatCompletion error:', error)
+    console.error('n8nChatCompletion error:', error)
     return {
       success: false,
-      error: error.message || 'Unknown error occurred in  chat completion'
+      error: error.message || 'Unknown error occurred in n8n chat completion'
     }
   }
 }
