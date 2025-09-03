@@ -18,12 +18,21 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Calendar } from "@/components/ui/calendar"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
-import { ResponsiveContainer, XAxis, YAxis, CartesianGrid, Line, LineChart, Pie, PieChart, Cell } from "recharts"
-import { BarChart3, Download, FileText, CalendarIcon } from "lucide-react"
-import { useState } from "react"
+import { BarChart, Bar, ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianGrid, Line, LineChart, Pie, PieChart, Cell } from "recharts"
+import { BarChart3, Download, FileText, CalendarIcon, Plus, Trash2 } from "lucide-react"
+import { useEffect, useState } from "react"
 import { format } from "date-fns"
 import { th } from "date-fns/locale"
 import { AppHeader } from "@/components/header-bar"
+import { useResizeDetector } from "react-resize-detector";
+
+import { Responsive, WidthProvider, Layout } from "react-grid-layout";
+import "react-grid-layout/css/styles.css";
+import "react-resizable/css/styles.css";
+import EnergyDashboard from "./biChart"
+import Dashboard from "./biChart2"
+
+const ResponsiveGridLayout = WidthProvider(Responsive)
 
 const monthlyData = [
   { month: "ม.ค.", documents: 245, searches: 1250, users: 45 },
@@ -56,6 +65,14 @@ const performanceData = [
   { metric: "การใช้งาน Storage", value: "67%", target: "≤80%", status: "good" },
 ]
 
+
+// #region CHART
+// อยากได้หน้า dashboard ที่เลียนแบบ power BI มีฟีเจอร์แบบนี้
+// 1. แสดงผลพวก chart อยู่ใน card
+// 2. แต่ละ card สามารถ drag and drop ย้ายตำแหน่งได้
+// 3. สามารถกดเพิ่มหรือลด card ได้
+// 4. ข้อมูลที่นำมาแสดงผล จะเป็น mock ทั้งหมด ข้อมูลเกี่ยวกับระบบ AI OCR และ Generative AI
+
 export default function ReportsPage() {
   const [reportType, setReportType] = useState("monthly")
   const [dateRange, setDateRange] = useState<Date | undefined>(new Date())
@@ -79,6 +96,11 @@ export default function ReportsPage() {
     }
   }
 
+
+
+
+
+
   return (
     <SidebarProvider>
       <AppSidebar />
@@ -86,87 +108,11 @@ export default function ReportsPage() {
         <AppHeader title={'รายงาน'} />
 
         <div className="flex flex-1 flex-col gap-6 p-4 anifade">
-          {/* Report Controls */}
-          {/* <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <BarChart3 className="h-5 w-5" />
-                สร้างรายงาน
-              </CardTitle>
-              <CardDescription>เลือกประเภทรายงานและช่วงเวลาที่ต้องการ</CardDescription>
-            </CardHeader>
-
-            <CardContent>
-              <div className="grid gap-4 md:grid-cols-5">
-                <div className="space-y-2 col-span-1">
-                  <label className="text-sm font-medium">ประเภทรายงาน</label>
-                  <Select value={reportType} onValueChange={setReportType}>
-                    <SelectTrigger className="w-48 bg-white rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent className="rounded-lg shadow-md">
-                      <SelectItem value="monthly">รายงานประจำเดือน</SelectItem>
-                      <SelectItem value="quarterly">รายงานประจำไตรมาส</SelectItem>
-                      <SelectItem value="yearly">รายงานประจำปี</SelectItem>
-                      <SelectItem value="usage">รายงานการใช้งาน</SelectItem>
-                      <SelectItem value="performance">รายงานประสิทธิภาพ</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="space-y-2 col-span-1">
-                  <label className="text-sm font-medium">หน่วยงาน</label>
-                  <Select value={selectedDepartment} onValueChange={setSelectedDepartment}>
-                    <SelectTrigger className="w-48 bg-white rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent className="rounded-lg shadow-md">
-                      <SelectItem value="all">ทุกหน่วยงาน</SelectItem>
-                      <SelectItem value="secretary">สำนักงานเลขาธิการ</SelectItem>
-                      <SelectItem value="legal">กองกฎหมาย</SelectItem>
-                      <SelectItem value="academic">กองวิชาการ</SelectItem>
-                      <SelectItem value="admin">กองบริหาร</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="space-y-2 grid grid-cols-1 col-span-1">
-                  <label className="text-sm font-medium mb-1">วันที่</label>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button variant="outline" className="w-full justify-start text-left font-normal bg-transparent border border-[#dedede]">
-                        <CalendarIcon className="mr-2 h-4 w-4" />
-                        {dateRange ? format(dateRange, "PPP", { locale: th }) : "เลือกวันที่"}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0">
-                      <Calendar mode="single" selected={dateRange} onSelect={setDateRange} initialFocus />
-                    </PopoverContent>
-                  </Popover>
-                </div>
-
-                <div className="flex gap-2 col-span-2 items-end justify-end">
-                  <Button onClick={() => generateReport("pdf")}>
-                    <Download className="h-4 w-4 mr-2" />
-                    PDF
-                  </Button>
-                  <Button variant="outline" onClick={() => generateReport("excel")}>
-                    <Download className="h-4 w-4 mr-2" />
-                    Excel
-                  </Button>
-                  <Button variant="outline" onClick={() => generateReport("word")}>
-                    <Download className="h-4 w-4 mr-2" />
-                    Word
-                  </Button>
-                </div>
-              </div>
-            </CardContent>
-          </Card> */}
 
           {/* Performance Metrics */}
-          <Card>
+          {/* <Card>
             <CardHeader>
-              <CardTitle>ตัวชี้วัดประสิทธิภาพ</CardTitle>
+              <CardTitle>ตัวชี้วัดประสิทธิภาพของระบบ</CardTitle>
               <CardDescription>ภาพรวมประสิทธิภาพของระบบในเดือนปัจจุบัน</CardDescription>
             </CardHeader>
             <CardContent>
@@ -183,88 +129,10 @@ export default function ReportsPage() {
                 ))}
               </div>
             </CardContent>
-          </Card>
+          </Card> */}
 
           {/* Charts */}
-          <div className="grid gap-6 md:grid-cols-2">
-            {/* <Card>
-              <CardHeader>
-                <CardTitle>แนวโน้มการใช้งานรายเดือน</CardTitle>
-                <CardDescription>จำนวนเอกสาร การค้นหา และผู้ใช้งาน</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <ChartContainer
-                  config={{
-                    documents: {
-                      label: "เอกสาร",
-                      color: "hsl(var(--chart-1))",
-                    },
-                    searches: {
-                      label: "การค้นหา",
-                      color: "hsl(var(--chart-2))",
-                    },
-                    users: {
-                      label: "ผู้ใช้งาน",
-                      color: "hsl(var(--chart-3))",
-                    },
-                  }}
-                  className="h-[300px] w-full"
-                >
-                  <ResponsiveContainer width="100%" height="100%">
-                    <LineChart data={monthlyData}>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="month" />
-                      <YAxis />
-                      <ChartTooltip content={<ChartTooltipContent />} />
-                      <Line type="monotone" dataKey="documents" stroke="#E3C22D" strokeWidth={2} fill="#E3C22D"/>
-                      <Line type="monotone" dataKey="searches" stroke="#2DACE3" strokeWidth={2} fill="#2DACE3"/>
-                      <Line type="monotone" dataKey="users" stroke="#E34E2D" strokeWidth={2} fill="#E34E2D"/>
-                    </LineChart>
-                  </ResponsiveContainer>
-                </ChartContainer>
-              </CardContent>
-            </Card> */}
-
-
-
-
-            {/* <Card>
-              <CardHeader>
-                <CardTitle>การแจกแจงประเภทเอกสาร</CardTitle>
-                <CardDescription>สัดส่วนประเภทเอกสารที่อัปโหลดในระบบ</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <ChartContainer
-                  config={{
-                    documents: {
-                      label: "เอกสาร",
-                    },
-                  }}
-                  className="h-[300px] w-full"
-                >
-                  <ResponsiveContainer width="100%" height="100%">
-                    <PieChart>
-                      <Pie
-                        data={documentTypeData}
-                        cx="50%"
-                        cy="50%"
-                        labelLine={false}
-                        label={({ name, percent }: any) => `${name} ${(percent * 100).toFixed(0)}%`}
-                        outerRadius={80}
-                        fill="#8884d8"
-                        dataKey="value"
-                      >
-                        {documentTypeData.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={entry.color} />
-                        ))}
-                      </Pie>
-                      <ChartTooltip content={<ChartTooltipContent />} />
-                    </PieChart>
-                  </ResponsiveContainer>
-                </ChartContainer>
-              </CardContent>
-            </Card> */}
-
+          {/* <div className="grid gap-6 md:grid-cols-2">
 
             <Card className="rounded-2xl border border-gray-200 bg-white shadow-sm">
               <CardHeader className="pb-4 border-b border-gray-100">
@@ -285,10 +153,8 @@ export default function ReportsPage() {
                 >
                   <ResponsiveContainer width="100%" height="100%">
                     <LineChart data={monthlyData}>
-                      {/* Grid */}
                       <CartesianGrid stroke="#E5E7EB" strokeDasharray="3 3" />
 
-                      {/* Axis */}
                       <XAxis
                         dataKey="month"
                         stroke="#9CA3AF"
@@ -297,12 +163,10 @@ export default function ReportsPage() {
                       />
                       <YAxis stroke="#9CA3AF" tickLine={false} axisLine={{ stroke: "#D1D5DB" }} />
 
-                      {/* Tooltip */}
                       <ChartTooltip
                         content={<ChartTooltipContent />}
                       />
 
-                      {/* Lines */}
                       <Line
                         type="monotone"
                         dataKey="documents"
@@ -329,8 +193,6 @@ export default function ReportsPage() {
                 </ChartContainer>
               </CardContent>
             </Card>
-
-
 
             <Card className="rounded-2xl border border-gray-200 bg-white shadow-sm">
               <CardHeader className="pb-4 border-b border-gray-100">
@@ -375,7 +237,27 @@ export default function ReportsPage() {
               </CardContent>
             </Card>
 
-          </div>
+          </div> */}
+
+
+
+
+          {/* <EnergyDashboard /> */}
+          <Card>
+            <CardHeader>
+              <CardTitle>ข้อมูลพลังงาน</CardTitle>
+              <CardDescription>คณะกรรมการกำกับกิจการพลังงาน</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <Dashboard />
+              </div>
+            </CardContent>
+          </Card>
+
+
+
+
 
           {/* Recent Reports */}
           <Card>
@@ -433,6 +315,14 @@ export default function ReportsPage() {
             </CardContent>
           </Card>
         </div>
+
+
+
+
+
+
+
+
       </SidebarInset>
     </SidebarProvider>
   )

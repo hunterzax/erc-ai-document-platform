@@ -17,11 +17,13 @@ import { Textarea } from "@/components/ui/textarea"
 import { Badge } from "@/components/ui/badge"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Brain, FileText, Sparkles, Copy, Download, Loader2 } from "lucide-react"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { AppHeader } from "@/components/header-bar"
+import axios from "axios"
 
 const tokenURLSmall = process.env.NEXT_PUBLIC_N8N_BASE_URL_SMALL;
 const tokenURLMedium = process.env.NEXT_PUBLIC_N8N_BASE_URL_MEDIUM;
+const URL_RAW_DOC = process.env.NEXT_PUBLIC_RAW_DOC;
 
 
 export default function SummarizePage() {
@@ -31,6 +33,9 @@ export default function SummarizePage() {
   const [isGenerating, setIsGenerating] = useState(false)
 
   const [copied, setCopied] = useState(false)
+
+  const [sourceData, setSourceData] = useState<any>([])
+  const [sourceDataSelect, setSourceDataSelect] = useState<any>()
 
   const handleCopy = async () => {
     try {
@@ -45,6 +50,8 @@ export default function SummarizePage() {
   const handleSummarize = async () => {
     setIsGenerating(true)
 
+    
+
 
     // summaryType
     const axios = require('axios');
@@ -54,7 +61,8 @@ export default function SummarizePage() {
           "id": 1,
           "role": "user",
           "timestamp": "2025-09-02T02:37:24.230Z",
-          "content": inputText
+          "content": inputText,
+          "source": sourceDataSelect,
         }
       ]
     });
@@ -94,6 +102,39 @@ export default function SummarizePage() {
     setSummaryType(e)
   }
 
+  const fetchData = async () => {
+    // console.log('fetchData')
+    // http://10.100.92.20:4600/raw_docs?limit=200&offset=0
+
+    let config = {
+      method: 'get',
+      maxBodyLength: Infinity,
+      // url: `${URL_SEARCH}?q=${searchQuery}&limit=100&score_threshold=0.9`,
+      url: `${URL_RAW_DOC}`,
+      headers: {}
+    };
+
+    let res_all_docs_result = await axios.request(config)
+    // console.log('res_all_docs_result', res_all_docs_result)
+
+    // ลบซ้ำ
+    const seen = new Set<string>();
+    const uniqueDocs2 = res_all_docs_result?.data?.items?.filter((doc: any) => {
+      if (seen.has(doc.file_name)) return false;
+      seen.add(doc.file_name);
+      return true;
+    });
+
+    // setSourceData(res_all_docs_result?.data?.items)
+    setSourceData(uniqueDocs2)
+  }
+
+  useEffect(() => {
+    fetchData()
+  }, [])
+
+  // console.log(">>> sourceDataSelect", sourceDataSelect)
+
   return (
     <SidebarProvider>
       <AppSidebar />
@@ -119,8 +160,8 @@ export default function SummarizePage() {
                   className="min-h-[300px] border border-[#dedede] placeholder:opacity-40"
                 />
 
-                <div className="flex items-center gap-4">
-                  <div className="space-y-2">
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <div className="space-y-2 col-span-1">
                     <label className="text-sm font-medium">ประเภทการสรุป</label>
 
 
@@ -130,7 +171,7 @@ export default function SummarizePage() {
                       onValueChange={(e: any) => handleSelectType(e)}
 
                     >
-                      <SelectTrigger className="w-40 border border-[#dedede]">
+                      <SelectTrigger className="w-full border border-[#dedede]">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -142,28 +183,45 @@ export default function SummarizePage() {
                     </Select>
                   </div>
 
+                  <div className="space-y-2 col-span-2">
+                    <label className="text-sm font-medium">เอกสารที่ต้องการสรุป</label>
+                    <Select value={sourceDataSelect} onValueChange={setSourceDataSelect}>
+                      <SelectTrigger className="w-full bg-white rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        <SelectValue placeholder="เลือกเอกสาร" />
+                      </SelectTrigger>
+
+                      <SelectContent className="rounded-lg shadow-md">
+                        {sourceData?.map((item: any, index: any) => (
+                          <SelectItem key={index} value={item?.file_name}>{item.title}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
                   {/* <Button onClick={handleSummarize} disabled={!inputText.trim() || isGenerating} className="mt-6">
                     <Brain className="h-4 w-4 mr-2" />
                     {isGenerating ? "กำลังสรุป..." : "สรุปด้วย AI"}
                   </Button> */}
 
-                  <Button
-                    onClick={handleSummarize}
-                    disabled={!inputText.trim() || isGenerating}
-                    className="mt-6 flex items-center gap-2"
-                  >
-                    {isGenerating ? (
-                      <>
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                        กำลังสรุป...
-                      </>
-                    ) : (
-                      <>
-                        <Brain className="h-4 w-4" />
-                        สรุปด้วย AI
-                      </>
-                    )}
-                  </Button>
+                  <div className="w-full col-span-1">
+                    <Button
+                      onClick={handleSummarize}
+                      disabled={!inputText.trim() || !sourceDataSelect || isGenerating}
+                      className="mt-6 flex items-center gap-2 w-full"
+                    >
+                      {isGenerating ? (
+                        <>
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                          กำลังสรุป...
+                        </>
+                      ) : (
+                        <>
+                          <Brain className="h-4 w-4" />
+                          สรุปด้วย AI
+                        </>
+                      )}
+                    </Button>
+                  </div>
                 </div>
               </CardContent>
             </Card>
@@ -245,7 +303,7 @@ export default function SummarizePage() {
 
 
 
-            
+
           </div>
         </div>
       </SidebarInset>

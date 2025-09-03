@@ -22,9 +22,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Search, Filter, Download, FileText, Calendar, Tag, Brain, Eye, Clock, Star, Copy } from "lucide-react"
 import { useEffect, useState } from "react"
 import { AppHeader } from "@/components/header-bar"
+import { Label } from "@/components/ui/label"
+
 const axios = require('axios');
 
 const URL_SEARCH = process.env.NEXT_PUBLIC_N8N_BASE_URL_SEARCH;
+const URL_RAW_DOC = process.env.NEXT_PUBLIC_RAW_DOC;
 
 interface SearchResult {
   id: string
@@ -88,31 +91,39 @@ export default function SearchPage() {
   const [isSearching, setIsSearching] = useState(false)
   const [isSearchClick, setIsSearchClick] = useState(false)
   const [activeTab, setActiveTab] = useState("keyword")
+  const [sourceData, setSourceData] = useState<any>([])
+  const [sourceDataSelect, setSourceDataSelect] = useState<any>("")
+  const [thresholdSelect, setThresholdSelect] = useState<any>("0.9")
 
   const handleSearch = async () => {
     setIsSearching(true)
     setIsSearchClick(true)
 
+    // search?q=กรรมการนโยบายพลังงานแห่งชาติ&source=ตัวอย่างใบคำพิพากษา.pdf&limit=100
+    // http://10.100.92.20:4600/qdrant/search?q=ราคา&source=ตัวอย่างใบคำพิพากษา.pdf&limit=100&score_threshold=0.9
+
     // summaryType
     let config = {
       method: 'get',
       maxBodyLength: Infinity,
-      url: `${URL_SEARCH}?q=${searchQuery}&limit=10`,
+      // url: `${URL_SEARCH}?q=${searchQuery}&limit=100&score_threshold=0.9`,
+      url: `${URL_SEARCH}?q=${searchQuery}&limit=100&score_threshold=${thresholdSelect}&source=${sourceDataSelect}`,
       headers: {}
     };
 
     let res_search_result = await axios.request(config)
-    console.log('res_search_result', res_search_result)
+    // console.log('res_search_result', res_search_result)
 
     // กรอง source ซ้ำออก
-    const uniqueBySource = res_search_result?.data?.items?.filter((item:any, index:any, self:any) => index === self.findIndex((t:any) => t.source === item.source));
+    const uniqueBySource = res_search_result?.data?.items?.filter((item: any, index: any, self: any) => index === self.findIndex((t: any) => t.source === item.source));
 
     // Simulate search delay
     setTimeout(() => {
       if (searchQuery.trim()) {
         // setSearchResults(mockSearchResults)
-        // setSearchResults(res_search_result?.data?.items)
-        setSearchResults(uniqueBySource)
+
+        setSearchResults(res_search_result?.data?.items)
+        // setSearchResults(uniqueBySource)
       } else {
         setSearchResults([])
       }
@@ -132,6 +143,36 @@ export default function SearchPage() {
     }
   }, [searchQuery])
 
+
+  const fetchData = async () => {
+    // console.log('fetchData')
+    // http://10.100.92.20:4600/raw_docs?limit=200&offset=0
+
+    let config = {
+      method: 'get',
+      maxBodyLength: Infinity,
+      // url: `${URL_SEARCH}?q=${searchQuery}&limit=100&score_threshold=0.9`,
+      url: `${URL_RAW_DOC}`,
+      headers: {}
+    };
+
+    let res_all_docs_result: any = await axios.request(config)
+
+    // ลบซ้ำ
+    const seen = new Set<string>();
+    const uniqueDocs2 = res_all_docs_result?.data?.items?.filter((doc: any) => {
+      if (seen.has(doc.file_name)) return false;
+      seen.add(doc.file_name);
+      return true;
+    });
+
+    // setSourceData(res_all_docs_result?.data?.items)
+    setSourceData(uniqueDocs2)
+  }
+
+  useEffect(() => {
+    fetchData()
+  }, [])
 
   // #region copy to clipboard
   const [copiedId, setCopiedId] = useState<number | null>(null)
@@ -189,6 +230,59 @@ export default function SearchPage() {
                     {isSearching ? "กำลังค้นหา..." : "ค้นหา"}
                   </Button>
                 </div>
+
+
+
+
+                <div className="grid gap-6 md:grid-cols-2">
+
+                  <div className="space-y-2 border-t pt-4">
+                    <Label htmlFor="backup-frequency" className="text-sm font-medium">
+                      ข้อมูลเอกสารที่ต้องการค้นหา
+                    </Label>
+                    <Select value={sourceDataSelect} onValueChange={setSourceDataSelect}>
+                      <SelectTrigger className="w-full bg-white rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        <SelectValue placeholder="เลือกเอกสาร" />
+                      </SelectTrigger>
+
+                      <SelectContent className="rounded-lg shadow-md">
+                        {sourceData?.map((item: any, index: any) => (
+                          <SelectItem key={index} value={item?.file_name}>{item.title}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+
+                  <div className="space-y-2 border-t pt-4">
+                    <Label htmlFor="backup-frequency" className="text-sm font-medium">
+                      ความละเอียดในการค้นหา
+                    </Label>
+                    <Select value={thresholdSelect} onValueChange={setThresholdSelect}>
+                      <SelectTrigger className="w-full bg-white rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        <SelectValue placeholder="ระบุ threshold" />
+                      </SelectTrigger>
+
+                      <SelectContent className="rounded-lg shadow-md">
+                        <SelectItem value="0.1">0.1</SelectItem>
+                        <SelectItem value="0.2">0.2</SelectItem>
+                        <SelectItem value="0.3">0.3</SelectItem>
+                        <SelectItem value="0.4">0.4</SelectItem>
+                        <SelectItem value="0.5">0.5</SelectItem>
+                        <SelectItem value="0.6">0.6</SelectItem>
+                        <SelectItem value="0.7">0.7</SelectItem>
+                        <SelectItem value="0.8">0.8</SelectItem>
+                        <SelectItem value="0.9">0.9</SelectItem>
+                      </SelectContent>
+
+                    </Select>
+                  </div>
+                </div>
+
+
+
+
+
 
                 {/* Filters */}
                 {/* <div className="grid gap-4 md:grid-cols-4">
